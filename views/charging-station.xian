@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Charging Station - IoT Device</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .charging-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .back-btn {
+            background: #e5e7eb;
+            color: #059669;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: #d1fae5;
+        }
+        
+        .lcd-display {
+            background: #059669;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .lcd-header {
+            color: #d1fae5;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #059669;
+        }
+        
+        .student-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            color: #000000ff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            opacity: 0.8;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            text-shadow: 0 0 5px #10b981;
+        }
+        
+        .points-display {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid #10b981;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .points-label {
+            color: #000000ff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .points-value {
+            color: #000000ff;
+            font-family: 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #059669;
+        }
+        
+        .control-panel {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .control-panel h3 {
+            color: #059669;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        
+        .socket-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .socket-btn {
+            background: white;
+            border: 3px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .socket-btn:hover {
+            border-color: #10b981;
+            transform: translateY(-2px);
+        }
+        
+        .socket-btn.active {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: #10b981;
+            color: white;
+        }
+        
+        .socket-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .socket-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .socket-status {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+        
+        .start-charging-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .start-charging-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+        
+        .start-charging-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .timer-display {
+            background: #059669;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            display: none;
+        }
+        
+        .timer-display.active {
+            display: block;
+        }
+        
+        .timer-label {
+            color: #d1fae5;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .timer-value {
+            color: #d1fae5;
+            font-family: 'Courier New', monospace;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #059669;
+            letter-spacing: 5px;
+        }
+        
+        .charging-status {
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 15px;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+        
+        .stop-btn {
+            width: 100%;
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .stop-btn:hover {
+            background: #dc2626;
+        }
+        
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+        
+        .log-table th, .log-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px;
+        }
+        
+        .log-table th {
+            background: #10b981;
+            color: white;
+        }
+        
+        .log-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="charging-container">
+        <button class="back-btn" onclick="window.location.href='/'">← Back to Dashboard</button>
+        
+        <h1 style="text-align: center; color: #10b981; margin-bottom: 30px;">⚡ Charging Station</h1>
+        
+        <!-- LCD Display Simulation -->
+        <div class="lcd-display">
+            <div class="lcd-header">╔════════════════════════════╗<br>║  STUDENT CHARGING DEVICE   ║<br>╚════════════════════════════╝</div>
+            
+            <div class="student-info" id="studentInfo">
+                <div class="info-row">
+                    <span class="info-label">STUDENT ID:</span>
+                    <span class="info-value" id="displayStudentId">2021-12345</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">NAME:</span>
+                    <span class="info-value" id="displayName">JUAN DELA CRUZ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">LAST USED:</span>
+                    <span class="info-value" id="displayLastUsed">2025-10-20</span>
+                </div>
+            </div>
+            
+            <div class="points-display">
+                <div class="points-label">AVAILABLE POINTS</div>
+                <div class="points-value" id="displayPoints">150</div>
+            </div>
+        </div>
+        
+        <!-- Control Panel -->
+        <div class="control-panel" id="controlPanel">
+            <h3>📝 Charging Configuration</h3>
+            
+            <div class="input-group">
+                <label for="studentId">RFID / Student ID</label>
+                <input type="text" id="studentId" placeholder="Scan RFID or enter ID" value="2021-12345">
+            </div>
+            
+            <div class="input-group">
+                <label for="pointsToSpend">Points to Spend</label>
+                <input type="number" id="pointsToSpend" placeholder="Enter points (e.g., 10)" min="1" max="150" value="10">
+            </div>
+            
+            <label style="display: block; color: #666; font-size: 14px; margin-bottom: 12px; font-weight: 600;">Select Charging Socket</label>
+            <div class="socket-selection">
+                <div class="socket-btn active" onclick="selectSocket(1)">
+                    <div class="socket-icon">🔌</div>
+                    <div class="socket-name">Universal Charger</div>
+                    <div class="socket-status">Available</div>
+                </div>
+                <div class="socket-btn" onclick="selectSocket(2)">
+                    <div class="socket-icon">🔌</div>
+                    <div class="socket-name">Own Charger</div>
+                    <div class="socket-status">Available</div>
+                </div>
+            </div>
+            
+            <button class="start-charging-btn" onclick="startCharging()">
+                ⚡ START CHARGING SESSION
+            </button>
+        </div>
+        
+        <!-- Timer Display (Hidden initially) -->
+        <div class="timer-display" id="timerDisplay">
+            <div class="timer-label">⏱️ CHARGING IN PROGRESS</div>
+            <div class="timer-value" id="timerValue">05:00</div>
+            <div class="charging-status">● Socket <span id="activeSocket">1</span> Active</div>
+            <button class="stop-btn" onclick="stopCharging()">⏹️ STOP CHARGING</button>
+        </div>
+        
+        <!-- Usage Log -->
+        <table class="log-table" id="usageLogTable">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Points Used</th>
+                    <th>Socket</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Usage log rows will appear here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        let selectedSocket = 1;
+        let chargingInterval = null;
+        let remainingSeconds = 0;
+        
+        function selectSocket(socketNumber) {
+            selectedSocket = socketNumber;
+            document.querySelectorAll('.socket-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index + 1 === socketNumber);
+            });
+        }
+        
+        function startCharging() {
+            const studentId = document.getElementById('studentId').value;
+            const pointsToSpend = parseInt(document.getElementById('pointsToSpend').value);
+            
+            if (!studentId || !pointsToSpend || pointsToSpend <= 0) {
+                alert('Please enter valid student ID and points!');
+                return;
+            }
+            
+            const currentPoints = parseInt(document.getElementById('displayPoints').textContent);
+            if (pointsToSpend > currentPoints) {
+                alert('Insufficient points!');
+                return;
+            }
+            
+            // Hide control panel, show timer
+            document.getElementById('controlPanel').style.display = 'none';
+            document.getElementById('timerDisplay').classList.add('active');
+            document.getElementById('activeSocket').textContent = selectedSocket;
+            
+            // Calculate duration (2 minutes per point as example)
+            remainingSeconds = pointsToSpend * 120; // 2 minutes = 120 seconds
+            updateTimerDisplay();
+            
+            // Start countdown
+            chargingInterval = setInterval(() => {
+                remainingSeconds--;
+                updateTimerDisplay();
+                
+                if (remainingSeconds <= 0) {
+                    stopCharging();
+                    alert('Charging session completed!');
+                }
+            }, 1000);
+            
+            console.log(`Started charging: Student ${studentId}, ${pointsToSpend} points, Socket ${selectedSocket}`);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timerValue').textContent = timeString;
+        }
+        
+        function stopCharging() {
+            if (chargingInterval) {
+                clearInterval(chargingInterval);
+                chargingInterval = null;
+            }
+            
+            // Calculate used points
+            const pointsToSpend = parseInt(document.getElementById('pointsToSpend').value);
+            const currentPoints = parseInt(document.getElementById('displayPoints').textContent);
+            const newPoints = currentPoints - pointsToSpend;
+            
+            // Update display
+            document.getElementById('displayPoints').textContent = newPoints;
+            
+            // Show control panel, hide timer
+            document.getElementById('controlPanel').style.display = 'block';
+            document.getElementById('timerDisplay').classList.remove('active');
+            
+            // Log usage
+            const student = document.getElementById('displayName').textContent;
+            const socket = selectedSocket;
+            const time = new Date().toLocaleString();
+            const logRow = {student, points: pointsToSpend, socket, time};
+            let log = localStorage.getItem('usageLog') ? JSON.parse(localStorage.getItem('usageLog')) : [];
+            log.push(logRow);
+            localStorage.setItem('usageLog', JSON.stringify(log));
+            updateUsageLog();
+            
+            console.log('Charging stopped. Points deducted. Remaining:', newPoints);
+        }
+        
+        function updateUsageLog() {
+            const log = localStorage.getItem('usageLog') ? JSON.parse(localStorage.getItem('usageLog')) : [];
+            const tbody = document.querySelector('#usageLogTable tbody');
+            tbody.innerHTML = '';
+            log.forEach(row=>{
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.student}</td><td>${row.points}</td><td>${row.socket}</td><td>${row.time}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // Auto-update student info when ID changes
+        document.getElementById('studentId').addEventListener('blur', function() {
+            const studentId = this.value;
+            if (studentId) {
+                document.getElementById('displayStudentId').textContent = studentId;
+                // Simulate fetching from Firebase
+                document.getElementById('displayName').textContent = 'JUAN DELA CRUZ';
+                document.getElementById('displayPoints').textContent = '150';
+                document.getElementById('displayLastUsed').textContent = new Date().toISOString().slice(0,10);
+            }
+        });
+        
+        window.addEventListener('load', updateUsageLog);
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Points</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .user-points-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(16,185,129,0.10);
+      padding: 32px 28px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+    }
+    .user-points-card h2 {
+      color: #10b981;
+      font-size: 1.5rem;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+    .user-info {
+      color: #059669;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+    .points {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #10b981;
+      margin: 24px 0 10px 0;
+    }
+    .points-label {
+      color: #666;
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+    }
+    .logout-btn {
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 0;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 18px;
+      transition: background 0.2s;
+    }
+    .logout-btn:hover {
+      background: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="user-points-card">
+    <h2>My Points</h2>
+    <div class="user-info" id="name">Name: ...</div>
+    <div class="user-info" id="rfid">ID: ...</div>
+    <div class="points-label">Current Points</div>
+    <div class="points" id="points">...</div>
+    <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+  </div>
+  <script>
+    fetch('/api/student/' + localStorage.getItem('rfid'))
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('name').textContent = 'Name: ' + (data.name || '');
+        document.getElementById('rfid').textContent = 'ID: ' + (data.rfid || '');
+        document.getElementById('points').textContent = data.points || '0';
+      });
+  </script>
+</body>
+</html>

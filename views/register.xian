@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html><head><title>Register</title><link rel="stylesheet" href="/style.css"><style>body{background:linear-gradient(135deg,#10b981 0%,#059669 100%);min-height:100vh;display:flex;align-items:center;justify-content:center}.register-card{background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;max-width:400px;width:95%;margin:auto}h2{color:#10b981;text-align:center;margin-bottom:20px}.input-group{margin-bottom:15px}.input-group label{display:block;color:#666;font-size:14px;margin-bottom:6px}.input-group input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:16px}.register-btn{background:#10b981;color:white;padding:12px 24px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;width:100%}.register-btn:hover{background:#059669}p{text-align:center;margin-top:10px}a{color:#059669;text-decoration:none;font-weight:bold}a:hover{text-decoration:underline}.error-msg{color:#ef4444;text-align:center;font-weight:bold;margin-bottom:10px}</style></head><body><div class="register-card"><h2>Register</h2>
+<div id="msg"></div>
+<form method="POST" action="/register"><div class="input-group"><label for="name">Name</label><input type="text" name="name" required></div><div class="input-group"><label for="email">Email</label><input type="email" name="email" required></div><div class="input-group"><label for="password">Password</label><input type="password" name="password" required></div><div class="input-group"><label for="rfid">RFID / Student ID</label><input type="text" name="rfid" required></div><button class="register-btn" type="submit">Register</button></form><p>Already have an account? <a href="/login">Login</a></p></div>
+<script>
+const params = new URLSearchParams(window.location.search);
+if(params.get('error')){
+  document.getElementById('msg').innerHTML = '<div class="error-msg">'+decodeURIComponent(params.get('error'))+'</div>';
+}
+</script>
+</body></html>
