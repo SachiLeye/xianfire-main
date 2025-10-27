@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-store" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Charging Station - Login</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,6 +175,23 @@
         <p>No account? <a href="/register">Register</a></p>
     </div>
     <script>
+        // Immediately check session status to avoid showing cached login when user is already authenticated
+        (async function(){
+            try {
+                const resp = await fetch('/api/session', { cache: 'no-store' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.authenticated) {
+                        // redirect to role-specific dashboard
+                        if (data.role === 'admin') return window.location.replace('/admin-dashboard');
+                        return window.location.replace('/user-dashboard');
+                    }
+                }
+            } catch (e) {
+                // ignore network errors, allow page to show
+            }
+        })();
+
         const params = new URLSearchParams(window.location.search);
         if (params.get('success')) {
             document.getElementById('msg').innerHTML = '<div class="success-msg"><i class="fas fa-check-circle"></i> Registration successful! You can now log in.</div>';

@@ -200,7 +200,7 @@
     </div>
 
     <div class="logout">
-      <button onclick="window.location.href='/logout'"><i class="fas fa-sign-out-alt"></i><span> Logout</span></button>
+      <button onclick="showLogoutModal()"><i class="fas fa-sign-out-alt"></i><span> Logout</span></button>
     </div>
   </div>
 
@@ -230,6 +230,18 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+      <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
+      <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button onclick="confirmLogout()" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600;">Logout</button>
+        <button onclick="hideLogoutModal()" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600;">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -266,6 +278,18 @@
           </tbody>
         </table>
       `;
+    }
+    function showLogoutModal() {
+      const m = document.getElementById('logoutModal');
+      m.style.display = 'flex';
+    }
+    function hideLogoutModal() {
+      const m = document.getElementById('logoutModal');
+      m.style.display = 'none';
+    }
+    function confirmLogout() {
+      // navigate to logout which will destroy the session server-side
+      window.location.href = '/logout';
     }
   </script>
 </body>

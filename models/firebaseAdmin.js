@@ -18,7 +18,7 @@ try {
   } else {
     // Do not attempt to use metadata server / ADC in local environments.
     adminAvailable = false;
-    console.warn("Firebase Admin not initialized. To enable admin features (create Auth users), place a service account JSON at ./serviceAccountKey.json or set GOOGLE_APPLICATION_CREDENTIALS to its path.");
+    // intentionally silent when admin is not configured
   }
 } catch (err) {
   console.error("Failed to initialize Firebase Admin:", err);

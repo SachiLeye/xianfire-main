@@ -113,9 +113,13 @@ export const loginUser = async (req, res) => {
     }
 
     // Authenticated
-    req.session.userId = userDoc.id;
-    req.session.rfid = userDoc.rfid;
-    req.session.role = userDoc.role || "user";
+  req.session.userId = userDoc.id;
+  req.session.rfid = userDoc.rfid;
+  req.session.role = userDoc.role || "user";
+  req.session.email = userDoc.email;
+  req.session.isAuthenticated = true;
+  // Set session duration (24 hours)
+  if (req.session.cookie) req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
     if (req.session.role === "admin") {
       res.redirect("/admin-dashboard");
     } else {

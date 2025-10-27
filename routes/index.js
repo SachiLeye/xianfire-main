@@ -15,14 +15,60 @@ function requireLogin(req, res, next) {
 }
 
 // Show login/register first
-router.get("/", (req, res) => res.redirect("/login"));
+// Redirect root to login or to dashboard if already authenticated
+router.get("/", (req, res) => {
+  if (req.session && req.session.userId) {
+    // send to role-specific dashboard
+    if (req.session.role === "admin") return res.redirect('/admin-dashboard');
+    return res.redirect('/user-dashboard');
+  }
+  res.redirect('/login');
+});
+
+// Middleware: prevent authenticated users from seeing login/register pages
+function redirectIfAuthenticated(req, res, next) {
+  if (req.session && req.session.userId) {
+    if (req.session.role === 'admin') return res.redirect('/admin-dashboard');
+    return res.redirect('/user-dashboard');
+  }
+  next();
+}
+
+// Session status endpoint for client-side checks
+router.get('/api/session', (req, res) => {
+  res.json({ authenticated: !!(req.session && req.session.userId), role: req.session?.role || null });
+});
 
 // Auth routes
-router.get("/login", (req, res) => res.render("login.xian"));
+router.get("/login", redirectIfAuthenticated, (req, res) => {
+  // prevent caching of login page so browser back button will revalidate session
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  return res.render("login.xian");
+});
 router.post("/login", loginUser);
-router.get("/register", (req, res) => res.render("register.xian"));
+router.get("/register", redirectIfAuthenticated, (req, res) => {
+  // prevent caching of register page so browser back button will revalidate session
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  res.set('Surrogate-Control', 'no-store');
+  return res.render("register.xian");
+});
 router.post("/register", registerUser);
-router.get("/logout", (req, res) => { req.session.destroy(); res.redirect("/login"); });
+router.get("/logout", (req, res) => {
+  // Properly destroy the session and clear the cookie, then redirect.
+  req.session.destroy(err => {
+    if (err) {
+      console.error('Session destroy error:', err);
+      return res.redirect('/login');
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+  });
+});
 router.get("/forgot-password", (req, res) => res.render("forgotpassword.xian"));
 
 // Forgot password API

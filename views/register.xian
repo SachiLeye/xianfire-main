@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <title>Register</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
   <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -217,6 +218,22 @@
   </div>
 
   <script>
+    // Immediately check session status to avoid showing cached register when user is already authenticated
+    (async function(){
+      try {
+        const resp = await fetch('/api/session', { cache: 'no-store' });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.authenticated) {
+            if (data.role === 'admin') return window.location.replace('/admin-dashboard');
+            return window.location.replace('/user-dashboard');
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    })();
+
     const params = new URLSearchParams(window.location.search);
     if (params.get('error')) {
       document.getElementById('msg').innerHTML = '<div class="error-msg">' + decodeURIComponent(params.get('error')) + '</div>';
