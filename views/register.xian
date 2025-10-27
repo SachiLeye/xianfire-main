@@ -1,11 +1,228 @@
 <!DOCTYPE html>
-<html><head><title>Register</title><link rel="stylesheet" href="/style.css"><style>body{background:linear-gradient(135deg,#10b981 0%,#059669 100%);min-height:100vh;display:flex;align-items:center;justify-content:center}.register-card{background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:40px;max-width:400px;width:95%;margin:auto}h2{color:#10b981;text-align:center;margin-bottom:20px}.input-group{margin-bottom:15px}.input-group label{display:block;color:#666;font-size:14px;margin-bottom:6px}.input-group input{width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:8px;font-size:16px}.register-btn{background:#10b981;color:white;padding:12px 24px;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;width:100%}.register-btn:hover{background:#059669}p{text-align:center;margin-top:10px}a{color:#059669;text-decoration:none;font-weight:bold}a:hover{text-decoration:underline}.error-msg{color:#ef4444;text-align:center;font-weight:bold;margin-bottom:10px}</style></head><body><div class="register-card"><h2>Register</h2>
-<div id="msg"></div>
-<form method="POST" action="/register"><div class="input-group"><label for="name">Name</label><input type="text" name="name" required></div><div class="input-group"><label for="email">Email</label><input type="email" name="email" required></div><div class="input-group"><label for="password">Password</label><input type="password" name="password" required></div><div class="input-group"><label for="rfid">RFID / Student ID</label><input type="text" name="rfid" required></div><button class="register-btn" type="submit">Register</button></form><p>Already have an account? <a href="/login">Login</a></p></div>
-<script>
-const params = new URLSearchParams(window.location.search);
-if(params.get('error')){
-  document.getElementById('msg').innerHTML = '<div class="error-msg">'+decodeURIComponent(params.get('error'))+'</div>';
+<html lang="en">
+<head>
+  <title>Register</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .register-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      margin: auto;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .logo i {
+      font-size: 48px;
+      color: #facc15;
+    }
+
+    h2 {
+      color: #059669;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 30px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .input-group label {
+      color: #374151;
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .input-group input,
+    .input-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      border-color: #10b981;
+      outline: none;
+    }
+
+.register-btn {
+  grid-column: span 2;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 40%;
+  transition: background 0.3s ease;
+  margin: 20px auto 0; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-</script>
-</body></html>
+
+
+    .register-btn:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    p {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #6b7280;
+      grid-column: span 2;
+    }
+
+    a {
+      color: #10b981;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      color: #dc2626;
+      text-align: center;
+      font-weight: 500;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #fef2f2;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+      grid-column: span 2;
+    }
+
+    @media (max-width: 600px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="register-card">
+    <div class="logo">
+      <i class="fas fa-bolt"></i>
+    </div>
+    <h2>Register</h2>
+    <div id="msg"></div>
+
+    <form method="POST" action="/register">
+      <!-- Left Column -->
+      <div class="input-group">
+        <label for="name">Full Name</label>
+        <input type="text" name="name" placeholder="Last name, first name, middle initial" required>
+      </div>
+
+      <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" name="email" placeholder="Enter your email" required>
+      </div>
+
+      <div class="input-group">
+        <label for="section">Section</label>
+        <select name="section" required>
+          <option value="" disabled selected>Select your section</option>
+          <option value="F1">F1</option>
+          <option value="F2">F2</option>
+          <option value="F3">F3</option>
+          <option value="F4">F4</option>
+          <option value="F5">F5</option>
+          <option value="F6">F6</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="year">Year</label>
+        <select name="year" required>
+          <option value="" disabled selected>Select your year</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+          <option value="4th Year">4th Year</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="contact">Contact Number</label>
+        <input type="tel" name="contact" placeholder="Enter your phone number" required>
+      </div>
+
+      <div class="input-group">
+        <label for="rfid">RFID / Student ID</label>
+        <input type="text" name="rfid" placeholder="Enter your RFID / ID No." required>
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" name="password" placeholder="Enter your password" required>
+      </div>
+
+     <div class="input-group">
+        <label for="confirm_password">Confirm Password</label>
+        <input type="password" name="confirm_password" placeholder="Confirm your password" required>
+      </div>
+
+      <button class="register-btn" type="submit">Register</button>
+
+      <p>Already have an account? <a href="/login">Login</a></p>
+    </form>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error')) {
+      document.getElementById('msg').innerHTML = '<div class="error-msg">' + decodeURIComponent(params.get('error')) + '</div>';
+    }
+  </script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
