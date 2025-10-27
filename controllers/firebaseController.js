@@ -1,6 +1,8 @@
-import { db } from "../models/firebase.js";
+import { db, auth } from "../models/firebase.js";
 import { collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs } from "firebase/firestore";
 import bcrypt from "bcrypt";
+import { authAdmin, adminAvailable } from "../models/firebaseAdmin.js";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export const registerUser = async (req, res) => {
   const { name, email, password, rfid, section, year, contact } = req.body;
@@ -26,23 +28,60 @@ export const registerUser = async (req, res) => {
       return res.redirect("/register?error=" + encodeURIComponent("Email already registered"));
     }
 
-    // Hash password
+    // Create Auth user first (prefer Admin SDK which allows setting uid to RFID)
+    let createdAuthUser = null;
+    if (adminAvailable && authAdmin) {
+      try {
+        createdAuthUser = await authAdmin.createUser({ uid: rfid, email, password, displayName: name });
+      } catch (err) {
+        console.error("Admin createUser failed, will attempt client SDK fallback:", err);
+        createdAuthUser = null;
+      }
+    }
+
+    // Fallback: try client SDK createUser if admin wasn't available or failed
+    if (!createdAuthUser) {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        createdAuthUser = { uid: userCredential.user.uid, email: userCredential.user.email };
+      } catch (err) {
+        console.error("Client createUser failed:", err);
+        return res.redirect("/register?error=" + encodeURIComponent("Failed to create authentication user. Configure firebase-admin or check Firebase project settings."));
+      }
+    }
+
+    // Hash password for Firestore record
     const saltRounds = 10;
     const hashed = await bcrypt.hash(password, saltRounds);
 
     // Save user in Firestore under document id == rfid
-    await setDoc(rfidRef, {
-      name,
-      email,
-      rfid,
-      section: section || null,
-      year: year || null,
-      contact: contact || null,
-      passwordHash: hashed,
-      points: 100,
-      lastUsed: null,
-      role
-    });
+    try {
+      await setDoc(rfidRef, {
+        name,
+        email,
+        rfid,
+        section: section || null,
+        year: year || null,
+        contact: contact || null,
+        passwordHash: hashed,
+        authUid: createdAuthUser.uid,
+        points: 100,
+        lastUsed: null,
+        role
+      });
+    } catch (err) {
+      console.error("Failed to save Firestore doc after creating auth user:", err);
+      // If we created the auth user with Admin SDK using RFID as uid, try to rollback
+      if (adminAvailable && authAdmin && createdAuthUser && createdAuthUser.uid === rfid) {
+        try {
+          await authAdmin.deleteUser(createdAuthUser.uid);
+          console.log("Rolled back auth user due to Firestore save failure:", createdAuthUser.uid);
+        } catch (delErr) {
+          console.error("Failed to rollback created auth user:", delErr);
+        }
+      }
+      return res.redirect("/register?error=" + encodeURIComponent("Failed to save user data, please try again."));
+    }
 
     res.redirect("/login?success=1");
   } catch (err) {
