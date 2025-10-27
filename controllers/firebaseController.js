@@ -146,6 +146,21 @@ export const getStudentByRFID = async (req, res) => {
   }
 };
 
+export const getCurrentStudent = async (req, res) => {
+  try {
+    const rfid = req.session && req.session.rfid;
+    if (!rfid) return res.status(401).json({ error: 'Not authenticated' });
+    const docRef = doc(db, 'students', rfid);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return res.json(docSnap.data());
+    }
+    return res.status(404).json({ error: 'Student not found' });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 export const addPoints = async (req, res) => {
   const { rfid, points } = req.body;
   try {

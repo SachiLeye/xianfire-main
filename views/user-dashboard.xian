@@ -256,23 +256,23 @@ body {
       <h1>Dashboard</h1>
       <div class="user-points-card">
         <h2>My Points</h2>
-        <div class="user-info"><b>Name:</b> ... </div>
-        <div class="user-info"><b>ID:</b>...</div>
+        <div class="user-info"><b>Name:</b> <span id="ud-name">...</span></div>
+        <div class="user-info"><b>ID:</b> <span id="ud-rfid">...</span></div>
         <div class="points-label">Current Points</div>
-        <div class="points">100</div>
+        <div class="points" id="ud-points">100</div>
       </div>
     </div>
 
-<div id="profile" class="profile-section" style="display:none;">
+    <div id="profile" class="profile-section" style="display:none;">
   <h1>Profile</h1>
   <div class="profile-card">
     <h2>Background Information</h2>
-    <p><strong>Name:</strong>...</p>
-    <p><strong>Email:</strong> ...</p>
-    <p><strong>Year:</strong> ...</p>
-    <p><strong>Section:</strong> ... </p>
-    <p><strong>RFID:</strong> ...</p>
-    <p><strong>Total Points:</strong> 100</p>
+    <p><strong>Name:</strong> <span id="pf-name">...</span></p>
+    <p><strong>Email:</strong> <span id="pf-email">...</span></p>
+    <p><strong>Year:</strong> <span id="pf-year">...</span></p>
+    <p><strong>Section:</strong> <span id="pf-section">...</span> </p>
+    <p><strong>RFID:</strong> <span id="pf-rfid">...</span></p>
+    <p><strong>Total Points:</strong> <span id="pf-points">100</span></p>
   </div>
 </div>
 
@@ -357,6 +357,35 @@ transactions.forEach(t => {
       <td>${t.points}</td>
     </tr>`;
 });
+
+// Fetch current logged-in user info and populate UI
+async function loadCurrentUser() {
+  try {
+    const resp = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+    if (!resp.ok) {
+      // Not authenticated or error - redirect to login
+      if (resp.status === 401) return window.location.replace('/login');
+      console.error('Failed to load user:', resp.statusText);
+      return;
+    }
+    const user = await resp.json();
+    // Populate dashboard
+    document.getElementById('ud-name').textContent = user.name || '';
+    document.getElementById('ud-rfid').textContent = user.rfid || '';
+    document.getElementById('ud-points').textContent = (user.points != null) ? user.points : '';
+    // Populate profile
+    document.getElementById('pf-name').textContent = user.name || '';
+    document.getElementById('pf-email').textContent = user.email || '';
+    document.getElementById('pf-year').textContent = user.year || '';
+    document.getElementById('pf-section').textContent = user.section || '';
+    document.getElementById('pf-rfid').textContent = user.rfid || '';
+    document.getElementById('pf-points').textContent = (user.points != null) ? user.points : '';
+  } catch (err) {
+    console.error('Error fetching current user:', err);
+  }
+}
+
+loadCurrentUser();
 </script>
 </body>
 </html>

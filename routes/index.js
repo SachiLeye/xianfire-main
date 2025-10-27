@@ -1,7 +1,7 @@
 import express from "express";
 import { homePage } from "../controllers/homeController.js";
 import { adminDashboard, chargingStation } from "../controllers/adminController.js";
-import { registerUser, loginUser, getStudentByRFID, addPoints } from "../controllers/firebaseController.js";
+import { registerUser, loginUser, getStudentByRFID, addPoints, getCurrentStudent } from "../controllers/firebaseController.js";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../models/firebase.js";
 
@@ -96,5 +96,6 @@ router.get("/user-dashboard-page", requireLogin, (req, res) => res.render("user-
 // Firebase endpoints
 router.get("/api/student/:rfid", getStudentByRFID);
 router.post("/api/add-points", addPoints);
+router.get('/api/me', requireLogin, getCurrentStudent);
 
 export default router;
