@@ -1,7 +1,10 @@
 import express from "express";
+import dotenv from "dotenv";
 import path from "path";
 import session from "express-session";
 import router from "./routes/index.js";
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,9 +13,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: "xianfire-secret-key",
+  secret: process.env.SESSION_SECRET || "xianfire-secret-key",
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    // session cookie lifetime; can be overridden by env
+    maxAge: parseInt(process.env.SESSION_MAX_AGE || String(24 * 60 * 60 * 1000), 10)
+  }
 }));
 
 // Serve static files from public folder

@@ -59,7 +59,7 @@
       </div>
       <button class="verify-btn" type="submit">Verify</button>
     </form>
-    <p><a href="forgot-password.html">Back</a></p>
+    <p><a href="/forgot-password">Back</a></p>
   </div>
 
   <script>
@@ -71,19 +71,50 @@
       notify.style.background = '#10b981';
     };
 
-    document.getElementById('verifyForm').onsubmit = function(e){
+    // Read email from query param
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email') || '';
+    // Show small hint if present
+    if (email) {
+      const hint = document.createElement('div');
+      hint.style.marginBottom = '12px';
+      hint.style.color = '#374151';
+      hint.textContent = 'A code was sent to: ' + email;
+      document.querySelector('.verify-card form').insertAdjacentElement('beforebegin', hint);
+    }
+
+    document.getElementById('verifyForm').onsubmit = async function(e){
       e.preventDefault();
       const code = document.getElementById('code').value.trim();
-
-      if(code !== ""){
-        notify.textContent = "Code verified! Redirecting...";
+      if (!code || !email) {
+        notify.textContent = 'Missing email or code.';
+        notify.style.background = '#ef4444';
         notify.classList.add('show');
-        setTimeout(() => {
-          window.location.href = "reset-password.html";
-        }, 2000);
-      } else {
-        notify.textContent = "Please enter a valid code.";
-        notify.style.background = "#ef4444";
+        setTimeout(() => notify.classList.remove('show'), 2000);
+        return;
+      }
+      try {
+        const resp = await fetch('/api/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.success) {
+          notify.textContent = 'Code verified! Redirecting...';
+          notify.style.background = '#10b981';
+          notify.classList.add('show');
+          setTimeout(() => window.location.href = '/reset-password?email=' + encodeURIComponent(email), 1200);
+        } else {
+          notify.textContent = 'Error: ' + (data.error || 'Invalid code');
+          notify.style.background = '#ef4444';
+          notify.classList.add('show');
+          setTimeout(() => notify.classList.remove('show'), 2000);
+        }
+      } catch (err) {
+        console.error(err);
+        notify.textContent = 'Network error';
+        notify.style.background = '#ef4444';
         notify.classList.add('show');
         setTimeout(() => notify.classList.remove('show'), 2000);
       }
