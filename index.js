@@ -25,14 +25,10 @@ app.use(session({
 // Serve static files from public folder
 app.use(express.static(path.join(process.cwd(), "public")));
 
-app.engine("xian", (filePath, options, callback) => {
-  import("fs").then(fs => {
-    fs.readFile(filePath, (err, content) => {
-      if (err) return callback(err);
-      return callback(null, content.toString());
-    });
-  });
-});
+
+// Register .xian as EJS template engine
+import ejs from "ejs";
+app.engine("xian", ejs.__express);
 
 app.set("views", path.join(process.cwd(), "views"));
 app.set("view engine", "xian");

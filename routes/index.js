@@ -184,7 +184,22 @@ router.get("/sections", requireLogin, (req, res) => res.render("sections.xian"))
 router.get("/user-dashboard", requireLogin, (req, res) => {
   res.send(`<!DOCTYPE html><html><head><meta http-equiv='refresh' content='0; url=/user-dashboard-page'></head><body><script>localStorage.setItem('rfid', '${req.session.rfid || ''}');</script></body></html>`);
 });
-router.get("/user-dashboard-page", requireLogin, (req, res) => res.render("user-dashboard.xian"));
+router.get("/user-dashboard-page", requireLogin, async (req, res) => {
+  try {
+    const rfid = req.session && req.session.rfid;
+    if (!rfid) return res.redirect('/login');
+    const docRef = doc(db, 'students', rfid);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return res.render("user-dashboard", { student: null });
+    }
+    const student = docSnap.data();
+    return res.render("user-dashboard", { student });
+  } catch (err) {
+    console.error('Error loading user dashboard:', err);
+    return res.render("user-dashboard", { student: null, error: err.message });
+  }
+});
 
 // Firebase endpoints
 router.get("/api/student/:rfid", getStudentByRFID);

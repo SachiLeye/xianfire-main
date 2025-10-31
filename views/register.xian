@@ -1,137 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Register</title>
-  <meta http-equiv="Cache-Control" content="no-store" />
-  <link rel="stylesheet" href="/style.css">
+  <title>Register - University Charging Station</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow-x: hidden;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
       background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+      font-family: 'Inter', sans-serif;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 24px;
     }
 
-    .register-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-      padding: 40px;
-      max-width: 800px;
+    /* wrapper stretches children so left fills full height */
+    .register-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;            /* <-- IMPORTANT: children will stretch to same height */
       width: 100%;
-      margin: auto;
+      max-width: 1100px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease;
+      min-height: 400px;               /* ensure a comfortable minimum height */
     }
 
-    .logo {
+    /* LEFT: the column itself (no internal padding) */
+    .register-left {
+      flex: 1;
+      min-width: 400px;
+      display: flex;
+      align-items: stretch; /* allow promo to fill this column */
+    }
+
+    /* promo block fills left column entirely and holds padding */
+    .promo {
+      flex: 1;
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      margin-bottom: 20px;
+      padding: 48px 36px;
     }
 
-    .logo i {
-      font-size: 48px;
-      color: #facc15;
+    .promo i { font-size: 64px; color: #facc15; margin-bottom: 18px; }
+    .promo h1 { font-size: 28px; font-weight: 600; margin-bottom: 10px; }
+    .promo p { color: #d1fae5; max-width: 320px; line-height: 1.5; }
+
+    /* RIGHT: form column */
+    .register-right {
+      flex: 2;
+      padding: 56px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: left; /* keep labels left aligned */
     }
 
     h2 {
       color: #059669;
-      text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 24px;
       font-size: 24px;
       font-weight: 600;
+      text-align: center;
+      width: 100%;
     }
+
+    #msg { margin-bottom: 10px; width: 100%; }
 
     form {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px 30px;
+      gap: 18px 28px;
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
     }
 
-    .input-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .input-group label {
-      color: #374151;
-      font-size: 14px;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
+    .input-group { display: flex; flex-direction: column; align-items: flex-start; }
+    .input-group label { font-size: 13px; color: #374151; margin-bottom: 6px; font-weight: 500; }
     .input-group input,
     .input-group select {
       width: 100%;
-      padding: 12px 16px;
+      padding: 10px 12px;
       border: 1px solid #d1d5db;
       border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
+      font-size: 14px;
     }
-
     .input-group input:focus,
     .input-group select:focus {
       border-color: #10b981;
       outline: none;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.06);
     }
 
-.register-btn {
-  grid-column: span 2;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 40%;
-  transition: background 0.3s ease;
-  margin: 20px auto 0; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
-    .register-btn:hover {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
-
-    p {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-      color: #6b7280;
+    .register-btn {
       grid-column: span 2;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      padding: 11px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 50%;
+      margin: 18px auto 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
     }
+    .register-btn:hover { transform: translateY(-2px); }
 
-    a {
-      color: #10b981;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
+    p { grid-column: span 2; text-align: center; font-size: 13px; color: #6b7280; margin-top: 12px; }
+    a { color: #10b981; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
 
     .error-msg {
       color: #dc2626;
       text-align: center;
       font-weight: 500;
-      margin-bottom: 15px;
       padding: 10px;
       background: #fef2f2;
       border-radius: 8px;
@@ -139,107 +149,143 @@
       grid-column: span 2;
     }
 
-    @media (max-width: 600px) {
-      form {
-        grid-template-columns: 1fr;
-      }
-    }
+    /* ---------- Responsive adjustments ---------- */
+   @media (max-width: 992px) {
+      body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 75px 20px 40px;
+    box-sizing: border-box;
+  }
+.register-wrapper {
+    flex-direction: column;
+    justify-content: flex-start; /* ✅ prevents being too centered vertically */
+    align-items: center;
+    width: 100%;
+    max-width: 420px;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .register-left { display: none; }
+
+  .register-right {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    max-width: 380px;
+    padding: 60px 28px 36px; /* ✅ more top padding inside the card */
+    text-align: left;
+    margin: 0 auto;
+  }
+
+form {
+  grid-template-columns: 1fr;
+  gap: 1px;
+  max-width: 320px;
+}
+
+  .register-btn {
+    grid-column: 1;
+    width: 100%;
+    max-width: 280px;
+    margin-top: 16px;
+  }
+
+  p {
+    grid-column: 1;
+    font-size: 13px;
+  }
+}
   </style>
 </head>
 
 <body>
-  <div class="register-card">
-    <div class="logo">
-      <i class="fas fa-bolt"></i>
+  <div class="register-wrapper">
+    <!-- LEFT SIDE (promo fills the entire left column) -->
+    <div class="register-left">
+      <div class="promo" role="img" aria-label="Create your account promo">
+        <i class="fas fa-bolt" aria-hidden="true"></i>
+        <h1>Create Your Account</h1>
+        <p>Join the University Charging Station system and manage your charging sessions with ease and security.</p>
+      </div>
     </div>
-    <h2>Register</h2>
-    <div id="msg"></div>
 
-    <form method="POST" action="/register">
-      <!-- Left Column -->
-      <div class="input-group">
-        <label for="name">Full Name</label>
-        <input type="text" name="name" placeholder="Last name, first name, middle initial" required>
-      </div>
+    <!-- RIGHT SIDE -->
+    <div class="register-right">
+      <h2>Register</h2>
+      <div id="msg"></div>
 
-      <div class="input-group">
-        <label for="email">Email</label>
-        <input type="email" name="email" placeholder="Enter your email" required>
-      </div>
+      <form method="POST" action="/register">
+        <div class="input-group">
+          <label for="name">Full Name</label>
+          <input id="name" type="text" name="name" placeholder="Last name, first name, middle initial" required>
+        </div>
 
-      <div class="input-group">
-        <label for="section">Section</label>
-        <select name="section" required>
-          <option value="" disabled selected>Select your section</option>
-          <option value="F1">F1</option>
-          <option value="F2">F2</option>
-          <option value="F3">F3</option>
-          <option value="F4">F4</option>
-          <option value="F5">F5</option>
-          <option value="F6">F6</option>
-        </select>
-      </div>
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input id="email" type="email" name="email" placeholder="Enter your email" required>
+        </div>
 
-      <div class="input-group">
-        <label for="year">Year</label>
-        <select name="year" required>
-          <option value="" disabled selected>Select your year</option>
-          <option value="1st Year">1st Year</option>
-          <option value="2nd Year">2nd Year</option>
-          <option value="3rd Year">3rd Year</option>
-          <option value="4th Year">4th Year</option>
-        </select>
-      </div>
+        <div class="input-group">
+          <label for="section">Section</label>
+          <select id="section" name="section" required>
+            <option value="" disabled selected>Select your section</option>
+            <option value="F1">F1</option>
+            <option value="F2">F2</option>
+            <option value="F3">F3</option>
+            <option value="F4">F4</option>
+            <option value="F5">F5</option>
+            <option value="F6">F6</option>
+          </select>
+        </div>
 
-      <div class="input-group">
-        <label for="contact">Contact Number</label>
-        <input type="tel" name="contact" placeholder="Enter your phone number" required>
-      </div>
+        <div class="input-group">
+          <label for="year">Year</label>
+          <select id="year" name="year" required>
+            <option value="" disabled selected>Select your year</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+            <option value="4th Year">4th Year</option>
+          </select>
+        </div>
 
-      <div class="input-group">
-        <label for="rfid">RFID / Student ID</label>
-        <input type="text" name="rfid" placeholder="Enter your RFID / ID No." required>
-      </div>
+        <div class="input-group">
+          <label for="contact">Contact Number</label>
+          <input id="contact" type="tel" name="contact" placeholder="Enter your phone number" required>
+        </div>
 
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input type="password" name="password" placeholder="Enter your password" required>
-      </div>
+        <div class="input-group">
+          <label for="rfid">RFID / Student ID</label>
+          <input id="rfid" type="text" name="rfid" placeholder="Enter your RFID / ID No." required>
+        </div>
 
-     <div class="input-group">
-        <label for="confirm_password">Confirm Password</label>
-        <input type="password" name="confirm_password" placeholder="Confirm your password" required>
-      </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" placeholder="Enter your password" required>
+        </div>
 
-      <button class="register-btn" type="submit">Register</button>
+        <div class="input-group">
+          <label for="confirm_password">Confirm Password</label>
+          <input id="confirm_password" type="password" name="confirm_password" placeholder="Confirm your password" required>
+        </div>
 
-      <p>Already have an account? <a href="/login">Login</a></p>
-    </form>
+        <button class="register-btn" type="submit">Register</button>
+        <p>Already have an account? <a href="/login">Login</a></p>
+      </form>
+    </div>
   </div>
 
   <script>
-    // Immediately check session status to avoid showing cached register when user is already authenticated
-    (async function(){
-      try {
-        const resp = await fetch('/api/session', { cache: 'no-store' });
-        if (resp.ok) {
-          const data = await resp.json();
-          if (data.authenticated) {
-            if (data.role === 'admin') return window.location.replace('/admin-dashboard');
-            return window.location.replace('/user-dashboard');
-          }
-        }
-      } catch (e) {
-        // ignore
-      }
-    })();
-
     const params = new URLSearchParams(window.location.search);
     if (params.get('error')) {
-      document.getElementById('msg').innerHTML = '<div class="error-msg">' + decodeURIComponent(params.get('error')) + '</div>';
+      document.getElementById('msg').innerHTML =
+        '<div class="error-msg">' + decodeURIComponent(params.get('error')) + '</div>';
     }
   </script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </body>
 </html>

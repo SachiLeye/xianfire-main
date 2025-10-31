@@ -3,334 +3,324 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Student Dashboard - Charging Station</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<title>Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
-/* Reset and base */
+/* ---------- Base ---------- */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 body {
   background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
   min-height: 100vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-}
-
-/* Outer container */
-.main-table {
-  display: flex;
-  width: 1000px;
-  max-width: 95%;
-  height: 600px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border-radius: 25px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-/* Sidebar */
-.sidebar {
-  width: 250px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  padding: 20px;
-  transition: width 0.3s ease;
-  position: relative;
-}
-
-.sidebar.close {
-  width: 80px;
-  padding: 20px 10px;
-}
-
-.toggle-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: #10b981;
-  color: white;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  z-index: 10;
-}
-
-.sidebar h2 {
-  text-align: center;
-  color: white;
-  margin-top: 60px;
-  margin-bottom: 30px;
-  font-weight: 600;
-  font-size: 20px;
-  transition: opacity 0.3s;
-}
-
-.sidebar.close h2 { opacity: 0; }
-
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.menu a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 10px 15px;
-  border-radius: 10px;
-  transition: background 0.3s, gap 0.3s;
-}
-
-.menu a:hover, .menu a.active { background: rgba(255,255,255,0.3); }
-.sidebar.close .menu a span { display: none; }
-
-/* Sidebar logout */
-.logout {
-  position: absolute;
-  bottom: 20px;
-  width: 90%;
-}
-
-.logout button {
-  width: 80%;
-  padding: 10px 15px;
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.sidebar.close .logout button span { display: none; }
-
-/* Content area */
-.content {
-  flex: 1;
-  background: white;
-  border-radius: 20px 0 0 20px;
-  padding: 30px;
-  transition: all 0.3s ease;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* --- Dashboard Section --- */
-.dashboard-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-    margin-top: 20px ;
-}
-
-.user-points-card {
-  background: #dcfce7;
-  color: #084d20ff;
-  padding: 30px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  
-  display: flex;
-  flex-direction: column;
-  align-items: center;   /* center horizontally */
-  justify-content: center; /* center vertically if card has height */
-  text-align: center;     /* center text */
-}
-
-.user-points-card h2 { font-size: 25px; margin-bottom: 15px; }
-.user-info { margin-bottom: 8px; font-size: 18px; }
-.points-label { font-size: 18px; font-weight: 700; opacity: 0.9; margin-top:25px; }
-.points { font-size: 36px; font-weight: 700; margin: 10px 0; }
-
-
-
-
-
-/* --- Profile Section --- */
-.profile-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
   align-items: flex-start;
-  margin-top: 20px;
-  height: 100%; /* make parent take full height */
+  color: #064e3b;
 }
 
-.profile-card {
-  background:  #dcfce7;
-  color: #084d20ff;
-  padding: 25px 30px;
-  border-radius: 20px;
-  box-shadow: 0 6px 20px rgba(11, 73, 47, 0.1);
+/* ---------- Container ---------- */
+.container {
   width: 100%;
-  flex: 1; /* stretch to fill parent */
+  max-width: 1200px;
+  background: #ffffffd9;
+  margin: 30px 20px;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  gap: 30px;
+  backdrop-filter: blur(8px);
 }
 
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #d1fae5;
+  padding-bottom: 10px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #065f46;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  width: auto;
+  max-width: 15%;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.3s ease;
+  text-align: center;
+}
+
+.logout-btn:hover {
+  background: #b71c1c;
+  transform: scale(1.05);
+}
+
+/* ---------- Layout ---------- */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+/* ---------- Profile ---------- */
+.profile-card {
+  background: #f0fdf4;
+  padding: 25px 30px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
 
 .profile-card h2 {
-  font-size: 25px;
-  margin-bottom: 15px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 12px;
 }
 
 .profile-card p {
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #047857;
+  margin-bottom: 6px;
 }
 
-.profile-card p strong {
-  opacity: 0.9;
+.profile-card .contact-info p {
+  color: #064e3b;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* ---------- Dashboard ---------- */
+.points-card {
+  background: #fffde7;
+  padding: 25px 30px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+}
 
-/* --- Table (Transactions) --- */
-.transaction-section table {
+.points-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.points-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fef9c3;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border: 1px solid #fde68a;
+}
+
+.points-item strong {
+  color: #065f46;
+}
+
+.points-item span {
+  color: #047857;
+  font-weight: 600;
+}
+
+/* ---------- Transaction History ---------- */
+.transaction-card {
+  background: #f8fafc;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 25px 30px;
+}
+
+.transaction-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transaction-card table {
   width: 100%;
   border-collapse: collapse;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 20px ;
+  font-size: 0.9rem;
 }
 
-.transaction-section th, .transaction-section td {
-  padding: 12px 15px;
+.transaction-card th,
+.transaction-card td {
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 10px 8px;
 }
 
-.transaction-section th {
+.transaction-card th {
   background: #10b981;
   color: white;
   font-weight: 600;
 }
 
-.transaction-section tr:nth-child(even) { background: #f0fdf4; }
-.transaction-section tr:hover { background: #dcfce7; }
-
-</style>
-</head>
-<body>
-<div class="main-table" id="mainBox">
-  <div class="sidebar" id="sidebar">
-    <div class="toggle-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-    <h2>⚡ Charging Station</h2>
-    <div class="menu">
-      <a href="#" class="active" onclick="showSection('dashboard', this)"><i class="fas fa-gauge"></i><span>Dashboard</span></a>
-      <a href="#" onclick="showSection('profile', this)"><i class="fas fa-user"></i><span>Profile</span></a>
-      <a href="#" onclick="showSection('transaction', this)"><i class="fas fa-receipt"></i><span>Transactions</span></a>
-    </div>
-    <div class="logout">
-      <button onclick="showLogoutModal()"><i class="fas fa-sign-out-alt"></i><span> Logout</span></button>
-    </div>
-  </div>
-
-  <div class="content" id="content">
-    <div id="dashboard" class="dashboard-section">
-      <h1>Dashboard</h1>
-      <div class="user-points-card">
-        <h2>My Points</h2>
-        <div class="user-info"><b>Name:</b> <span id="ud-name">...</span></div>
-        <div class="user-info"><b>ID:</b> <span id="ud-rfid">...</span></div>
-        <div class="points-label">Current Points</div>
-        <div class="points" id="ud-points">100</div>
-      </div>
-    </div>
-
-    <div id="profile" class="profile-section" style="display:none;">
-  <h1>Profile</h1>
-  <div class="profile-card">
-    <h2>Background Information</h2>
-    <p><strong>Name:</strong> <span id="pf-name">...</span></p>
-    <p><strong>Email:</strong> <span id="pf-email">...</span></p>
-    <p><strong>Year:</strong> <span id="pf-year">...</span></p>
-    <p><strong>Section:</strong> <span id="pf-section">...</span> </p>
-    <p><strong>RFID:</strong> <span id="pf-rfid">...</span></p>
-    <p><strong>Total Points:</strong> <span id="pf-points">100</span></p>
-  </div>
-</div>
-
-
-    <div id="transaction" class="transaction-section" style="display:none;">
-      <h1>Transaction History</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Allotted Hours</th>
-            <th>Points Used</th>
-          </tr>
-        </thead>
-        <tbody id="transactionTable"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<script>
-const sidebar = document.getElementById("sidebar");
-
-function toggleSidebar() {
-  sidebar.classList.toggle("close");
+.transaction-card tr:nth-child(even) {
+  background: #ecfccb;
 }
 
-function showLogoutModal() {
-  let modal = document.getElementById('logoutModal');
-  if (!modal) {
-    // Create modal dynamically
-    modal = document.createElement('div');
-    modal.id = 'logoutModal';
-    modal.style = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:9999;';
-    modal.innerHTML = `
-      <div style="background:#fff; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
-        <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
-        <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
-        <div style="display:flex; gap:10px; justify-content:center;">
-          <button id="confirmLogoutBtn" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600;">Logout</button>
-          <button id="cancelLogoutBtn" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600;">Cancel</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-    document.getElementById('confirmLogoutBtn').addEventListener('click', () => { window.location.href = '/logout'; });
-    document.getElementById('cancelLogoutBtn').addEventListener('click', () => { modal.remove(); });
+.transaction-card tr:hover {
+  background: #d9f99d;
+  transition: 0.2s;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .profile-card,
+  .points-card,
+  .transaction-card {
+    padding: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .points-item {
+    font-size: 0.9rem;
   }
 }
 
-function showSection(section, el) {
-  document.querySelectorAll('.content > div').forEach(div => div.style.display = 'none');
-  document.getElementById(section).style.display = 'block';
-  document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
-  el.classList.add('active');
-}
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+  }
 
+  .profile-card h2,
+  .points-card h3,
+  .transaction-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .logout-btn {
+    width: 45px;              /* Make it a small round button */
+    height: 45px;
+    border-radius: 50%;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .logout-btn span {
+    display: none;            /* Hide the text label */
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Student Dashboard</h1>
+  </div>
+
+  <!-- Profile and Dashboard -->
+  <div class="dashboard-layout">
+
+    <!-- Profile -->
+    <div class="profile-card">
+      <% if (student) { %>
+        <h2><%= student.name || 'No Name' %></h2>
+        <p><strong>Course:</strong> <%= student.course || 'N/A' %></p>
+        <div class="contact-info">
+          <p><i class="fa-solid fa-envelope"></i> <%= student.email || 'N/A' %></p>
+          <p><i class="fa-solid fa-id-card"></i> RFID: <%= student.rfid || 'N/A' %></p>
+        </div>
+      <% } else { %>
+        <h2>No student data found</h2>
+      <% } %>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="points-card">
+      <h3><i class="fa-solid fa-gauge-high"></i> Dashboard Overview</h3>
+      <div class="points-details">
+        <div class="points-item">
+          <strong>Current Points</strong>
+          <span><%= student && student.points != null ? student.points : 'N/A' %></span>
+        </div>
+        <div class="points-item">
+          <strong>Last Session</strong>
+          <span><%= student && student.lastSession ? student.lastSession : 'N/A' %></span>
+        </div>
+        <div class="points-item">
+          <strong>Next Recharge</strong>
+          <span><%= student && student.nextRecharge ? student.nextRecharge : 'Pending' %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="transaction-card">
+    <h3><i class="fa-solid fa-clock-rotate-left"></i> Transaction History</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Duration</th>
+          <th>Points Used</th>
+        </tr>
+      </thead>
+      <tbody id="transactionTable"></tbody>
+    </table>
+  </div>
+<button class="logout-btn">
+  <i class="fas fa-sign-out-alt"></i>
+  <span>Logout</span>
+</button>
+</div>
+
+<script>
 const transactions = [
   { date: "2025-10-25", time: "10:00 AM", points: 30 },
   { date: "2025-10-26", time: "2:30 PM", points: 10 },
@@ -343,11 +333,7 @@ transactions.forEach(t => {
   const totalMins = t.points * 2;
   const hours = Math.floor(totalMins / 60);
   const mins = totalMins % 60;
-
-  let timeDisplay = "";
-  if (hours > 0 && mins > 0) timeDisplay = `${hours} hr ${mins} min`;
-  else if (hours > 0) timeDisplay = `${hours} hr`;
-  else timeDisplay = `${mins} min`;
+  const timeDisplay = hours > 0 ? `${hours} hr${mins > 0 ? ` ${mins} min` : ""}` : `${mins} min`;
 
   tbody.innerHTML += `
     <tr>
@@ -357,35 +343,6 @@ transactions.forEach(t => {
       <td>${t.points}</td>
     </tr>`;
 });
-
-// Fetch current logged-in user info and populate UI
-async function loadCurrentUser() {
-  try {
-    const resp = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
-    if (!resp.ok) {
-      // Not authenticated or error - redirect to login
-      if (resp.status === 401) return window.location.replace('/login');
-      console.error('Failed to load user:', resp.statusText);
-      return;
-    }
-    const user = await resp.json();
-    // Populate dashboard
-    document.getElementById('ud-name').textContent = user.name || '';
-    document.getElementById('ud-rfid').textContent = user.rfid || '';
-    document.getElementById('ud-points').textContent = (user.points != null) ? user.points : '';
-    // Populate profile
-    document.getElementById('pf-name').textContent = user.name || '';
-    document.getElementById('pf-email').textContent = user.email || '';
-    document.getElementById('pf-year').textContent = user.year || '';
-    document.getElementById('pf-section').textContent = user.section || '';
-    document.getElementById('pf-rfid').textContent = user.rfid || '';
-    document.getElementById('pf-points').textContent = (user.points != null) ? user.points : '';
-  } catch (err) {
-    console.error('Error fetching current user:', err);
-  }
-}
-
-loadCurrentUser();
 </script>
 </body>
 </html>
