@@ -406,6 +406,34 @@ transactions.forEach(t => {
   function confirmLogout() {
     window.location.href = '/logout';
   }
+
+  // Prevent browser back button from going to unauthorized pages
+  (function() {
+    // Push current state to history to prevent back navigation
+    if (window.history && window.history.pushState) {
+      window.history.pushState('forward', null, window.location.href);
+      
+      // Listen for back button
+      window.addEventListener('popstate', function(event) {
+        // Check if user is still authenticated
+        fetch('/api/session')
+          .then(res => res.json())
+          .then(data => {
+            if (data.authenticated) {
+              // User is still logged in, stay on this page
+              window.history.pushState('forward', null, window.location.href);
+            } else {
+              // User is not authenticated, allow navigation
+              window.location.href = '/login';
+            }
+          })
+          .catch(() => {
+            // On error, stay on current page to be safe
+            window.history.pushState('forward', null, window.location.href);
+          });
+      });
+    }
+  })();
 </script>
 </body>
 </html>
