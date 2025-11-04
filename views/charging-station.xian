@@ -271,22 +271,46 @@
       border-collapse: collapse;
       margin-top: 10px;
       font-size: 13px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .log-table th,
     .log-table td {
-      border: 1px solid #e5e7eb;
-      padding: 6px 8px;
+      padding: 10px 12px;
       text-align: left;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .log-table th {
       background: #10b981;
       color: white;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .log-table tbody tr {
+      transition: background 0.2s;
+    }
+
+    .log-table tbody tr:hover {
+      background: #f0fdf4;
     }
 
     .log-table tr:nth-child(even) {
       background: #f9fafb;
+    }
+
+    .log-table tr:nth-child(even):hover {
+      background: #f0fdf4;
+    }
+
+    .log-table tbody tr:last-child td {
+      border-bottom: none;
     }
 
     /* Logout Button */
@@ -587,6 +611,9 @@
           // Update remaining points display
           document.getElementById("displayPoints").textContent = data.remainingPoints;
           
+          // Reload transaction table to show the new completed transaction
+          loadRecentTransactions();
+          
           if (!completed) {
             alert(`Charging ${data.transaction.status}! ${data.transaction.pointsRefunded ? 'Points refunded: ' + data.transaction.pointsRefunded : ''}`);
           }
@@ -611,6 +638,50 @@
         <td>${socket}</td>
         <td>${now}</td>
       `;
+      
+      // Keep only last 10 rows
+      while (table.rows.length > 10) {
+        table.deleteRow(table.rows.length - 1);
+      }
+    }
+
+    // Load recent transactions into the usage log
+    async function loadRecentTransactions() {
+      try {
+        const response = await fetch('/api/transactions/history');
+        const data = await response.json();
+        
+        if (data.success && data.transactions && data.transactions.length > 0) {
+          const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+          tbody.innerHTML = ''; // Clear existing rows
+          
+          // Show last 10 transactions
+          const recentTransactions = data.transactions.slice(0, 10);
+          
+          recentTransactions.forEach(txn => {
+            const row = tbody.insertRow();
+            const date = new Date(txn.startTime.seconds * 1000);
+            const time = date.toLocaleTimeString('en-US', { 
+              hour: 'numeric', 
+              minute: '2-digit',
+              hour12: true 
+            });
+            
+            row.innerHTML = `
+              <td>${txn.studentName || txn.rfid}</td>
+              <td>${txn.pointsUsed}</td>
+              <td>${txn.socketType}</td>
+              <td>${time}</td>
+            `;
+          });
+        } else {
+          // Show empty state
+          const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No recent transactions</td></tr>';
+        }
+      } catch (error) {
+        console.error('Error loading recent transactions:', error);
+      }
     }
 
     // Logout Modal Functions
@@ -626,10 +697,14 @@
       window.location.href = '/logout';
     }
 
-    // Load student data on page load
+    // Load student data and transactions on page load
     window.addEventListener('DOMContentLoaded', () => {
       loadStudentData();
+      loadRecentTransactions();
     });
+
+    // Refresh transactions every 30 seconds
+    setInterval(loadRecentTransactions, 30000);
 
     // Prevent browser back button from going to unauthorized pages
     (function() {
