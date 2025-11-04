@@ -225,6 +225,8 @@
       <p><a href="/forgot-password">Forgot password?</a></p>
       <br>
       <p>No account? <a href="/register">Register</a></p>
+      <br>
+      <p><a href="/"><i class="fas fa-home"></i> Back to RFID Scanner</a></p>
     </div>
   </div>
 
@@ -239,6 +241,11 @@
         '<div class="error-msg"><i class="fas fa-exclamation-triangle"></i> ' +
         decodeURIComponent(params.get('error')) +
         '</div>';
+    }
+    // Show message if coming from RFID scan to use points
+    if (params.get('action') === 'usepoints' && params.get('rfid')) {
+      document.getElementById('msg').innerHTML =
+        '<div class="success-msg"><i class="fas fa-info-circle"></i> Please login to use your points for charging.</div>';
     }
   </script>
 </body>

@@ -20,15 +20,10 @@ function requireLogin(req, res, next) {
   next();
 }
 
-// Show login/register first
-// Redirect root to login or to dashboard if already authenticated
+// Show RFID scanning page as landing page
 router.get("/", (req, res) => {
-  if (req.session && req.session.userId) {
-    // send to role-specific dashboard
-    if (req.session.role === "admin") return res.redirect('/admin-dashboard');
-    return res.redirect('/user-dashboard');
-  }
-  res.redirect('/login');
+  // Always show the RFID scanning index page first
+  res.render('index.xian');
 });
 
 // Middleware: prevent authenticated users from seeing login/register pages
