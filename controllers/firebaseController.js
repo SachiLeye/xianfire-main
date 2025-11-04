@@ -6,8 +6,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 
 export const registerUser = async (req, res) => {
   const { name, email, password, rfid, section, year, contact } = req.body;
-  // If registering as admin, use a special RFID or email (for demo, use 'admin@xianfire.com')
-  const role = email === "admin@xianfire.com" ? "admin" : "user";
+  // All users have 'user' role
+  const role = "user";
   try {
     // Basic validation
     if (!name || !email || !password || !rfid) {
@@ -120,11 +120,8 @@ export const loginUser = async (req, res) => {
   req.session.isAuthenticated = true;
   // Set session duration (24 hours)
   if (req.session.cookie) req.session.cookie.maxAge = 24 * 60 * 60 * 1000;
-    if (req.session.role === "admin") {
-      res.redirect("/admin-dashboard");
-    } else {
-      res.redirect("/user-dashboard");
-    }
+  // Always redirect to user dashboard
+  res.redirect("/user-dashboard");
   } catch (err) {
     console.error("Login error:", err);
     res.redirect("/login?error=" + encodeURIComponent(err.message || "Login failed"));

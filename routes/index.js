@@ -1,6 +1,6 @@
 import express from "express";
 import { homePage } from "../controllers/homeController.js";
-import { adminDashboard, chargingStation } from "../controllers/adminController.js";
+import { chargingStation } from "../controllers/adminController.js";
 import { registerUser, loginUser, getStudentByRFID, addPoints, getCurrentStudent } from "../controllers/firebaseController.js";
 import { query, where, getDocs } from 'firebase/firestore';
 import bcrypt from 'bcrypt';
@@ -29,7 +29,6 @@ router.get("/", (req, res) => {
 // Middleware: prevent authenticated users from seeing login/register pages
 function redirectIfAuthenticated(req, res, next) {
   if (req.session && req.session.userId) {
-    if (req.session.role === 'admin') return res.redirect('/admin-dashboard');
     return res.redirect('/user-dashboard');
   }
   next();
@@ -172,10 +171,7 @@ router.post('/api/verify-otp', async (req, res) => {
 
 // Protected routes
 router.get("/home", requireLogin, homePage);
-router.get("/admin-dashboard", requireLogin, (req, res) => res.render("admin-dashboard.xian"));
 router.get("/charging-station", requireLogin, chargingStation);
-router.get("/student-points", requireLogin, (req, res) => res.render("student-points.xian"));
-router.get("/sections", requireLogin, (req, res) => res.render("sections.xian"));
 router.get("/user-dashboard", requireLogin, (req, res) => {
   res.send(`<!DOCTYPE html><html><head><meta http-equiv='refresh' content='0; url=/user-dashboard-page'></head><body><script>localStorage.setItem('rfid', '${req.session.rfid || ''}');</script></body></html>`);
 });

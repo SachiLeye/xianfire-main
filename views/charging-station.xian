@@ -339,7 +339,7 @@
 <body>
   <div class="charging-container">
     <div class="header-controls">
-      <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+      <button class="back-btn" onclick="window.location.href='/user-dashboard'">← Back to Dashboard</button>
       <h1>⚡ Charging Station</h1>
     </div>
 
@@ -405,7 +405,19 @@
       <tbody></tbody>
     </table>
 
-    <button class="logout-btn" onclick="window.location.href='/logout'"><span>Logout</span></button>
+    <button class="logout-btn" onclick="showLogoutModal()"><span>Logout</span></button>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+      <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
+      <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button onclick="confirmLogout()" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Logout</button>
+        <button onclick="hideLogoutModal()" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -467,6 +479,19 @@
 
       document.getElementById("controlPanel").style.display = "block";
       document.getElementById("timerDisplay").classList.remove("active");
+    }
+
+    // Logout Modal Functions
+    function showLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'flex';
+    }
+    
+    function hideLogoutModal() {
+      document.getElementById('logoutModal').style.display = 'none';
+    }
+    
+    function confirmLogout() {
+      window.location.href = '/logout';
     }
   </script>
 </body>
