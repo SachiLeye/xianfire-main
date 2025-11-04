@@ -363,7 +363,7 @@
 <body>
   <div class="charging-container">
     <div class="header-controls">
-      <button class="back-btn" onclick="window.location.href='/user-dashboard'">← Back to Dashboard</button>
+      <button class="back-btn" id="backBtn">← Back to Dashboard</button>
       <h1>⚡ Charging Station</h1>
     </div>
 
@@ -398,23 +398,23 @@
       </div>
 
       <div class="socket-selection">
-        <div class="socket-btn active" onclick="selectSocket(1)">
+        <div class="socket-btn active" data-socket="1">
           <div class="socket-icon">🔌</div>
           <div>Universal Charger</div>
         </div>
-        <div class="socket-btn" onclick="selectSocket(2)">
+        <div class="socket-btn" data-socket="2">
           <div class="socket-icon">🔌</div>
           <div>Own Charger</div>
         </div>
       </div>
 
-      <button class="start-charging-btn" onclick="startCharging()">⚡ START CHARGING</button>
+      <button class="start-charging-btn" id="startChargingBtn">⚡ START CHARGING</button>
     </div>
 
     <div class="timer-display" id="timerDisplay">
       <div class="timer-label">⏱️ CHARGING IN PROGRESS</div>
       <div class="timer-value" id="timerValue">05:00</div>
-      <button class="stop-btn" onclick="stopCharging()">⏹️ STOP CHARGING</button>
+      <button class="stop-btn" id="stopChargingBtn">⏹️ STOP CHARGING</button>
     </div>
 
     <table class="log-table" id="usageLogTable">
@@ -429,7 +429,7 @@
       <tbody></tbody>
     </table>
 
-    <button class="logout-btn" onclick="showLogoutModal()"><span>Logout</span></button>
+    <button class="logout-btn" id="logoutBtn"><span>Logout</span></button>
   </div>
 
   <!-- Logout Confirmation Modal -->
@@ -438,8 +438,8 @@
       <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
       <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
       <div style="display:flex; gap:10px; justify-content:center;">
-        <button onclick="confirmLogout()" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Logout</button>
-        <button onclick="hideLogoutModal()" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+        <button id="confirmLogoutBtn" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Logout</button>
+        <button id="cancelLogoutBtn" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
       </div>
     </div>
   </div>
@@ -483,18 +483,35 @@
     // Resume an active charging session
     function resumeActiveSession(transaction) {
       currentTransactionId = transaction.id;
+      selectedSocket = transaction.socketNumber || 1;
+      
+      // Calculate remaining time correctly
       const startTime = transaction.startTime.seconds * 1000;
-      const expectedDuration = transaction.pointsUsed * 120;
+      const expectedDuration = transaction.pointsUsed * 120; // seconds
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       remainingSeconds = Math.max(0, expectedDuration - elapsed);
 
+      console.log('Resuming session:', {
+        transactionId: transaction.id,
+        startTime: new Date(startTime),
+        expectedDuration,
+        elapsed,
+        remainingSeconds
+      });
+
       if (remainingSeconds > 0) {
+        // Update socket selection display
+        document.querySelectorAll(".socket-btn").forEach((btn, index) => {
+          btn.classList.toggle("active", index + 1 === selectedSocket);
+        });
+        
         document.getElementById("controlPanel").style.display = "none";
         document.getElementById("timerDisplay").classList.add("active");
         updateTimer();
         startCountdown();
       } else {
         // Session should have ended, complete it
+        console.log('Session expired, completing automatically');
         stopCharging(true);
       }
     }
@@ -701,6 +718,25 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadStudentData();
       loadRecentTransactions();
+      
+      // Set up event listeners
+      document.getElementById('backBtn').addEventListener('click', () => {
+        window.location.href = '/user-dashboard';
+      });
+      
+      document.getElementById('startChargingBtn').addEventListener('click', startCharging);
+      document.getElementById('stopChargingBtn').addEventListener('click', () => stopCharging(false));
+      document.getElementById('logoutBtn').addEventListener('click', showLogoutModal);
+      document.getElementById('confirmLogoutBtn').addEventListener('click', confirmLogout);
+      document.getElementById('cancelLogoutBtn').addEventListener('click', hideLogoutModal);
+      
+      // Socket selection
+      document.querySelectorAll('.socket-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const socketNum = parseInt(btn.getAttribute('data-socket'));
+          selectSocket(socketNum);
+        });
+      });
     });
 
     // Refresh transactions every 30 seconds
