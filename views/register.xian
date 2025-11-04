@@ -149,6 +149,35 @@
       grid-column: span 2;
     }
 
+    .password-hint {
+      font-size: 12px;
+      margin-top: 4px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .password-hint.valid {
+      color: #059669;
+    }
+
+    .password-hint.invalid {
+      color: #dc2626;
+    }
+
+    .password-hint i {
+      font-size: 10px;
+    }
+
+    .input-group input.valid {
+      border-color: #059669;
+    }
+
+    .input-group input.invalid {
+      border-color: #dc2626;
+    }
+
     /* ---------- Responsive adjustments ---------- */
    @media (max-width: 992px) {
       body {
@@ -266,12 +295,20 @@ form {
 
         <div class="input-group">
           <label for="password">Password</label>
-          <input id="password" type="password" name="password" placeholder="Enter your password" required>
+          <input id="password" type="password" name="password" placeholder="Enter your password" required minlength="6">
+          <div class="password-hint" id="passwordHint">
+            <i class="fas fa-info-circle"></i>
+            <span>Password must be at least 6 characters</span>
+          </div>
         </div>
 
         <div class="input-group">
           <label for="confirm_password">Confirm Password</label>
-          <input id="confirm_password" type="password" name="confirm_password" placeholder="Confirm your password" required>
+          <input id="confirm_password" type="password" name="confirm_password" placeholder="Confirm your password" required minlength="6">
+          <div class="password-hint" id="confirmHint">
+            <i class="fas fa-info-circle"></i>
+            <span>Passwords must match</span>
+          </div>
         </div>
 
         <button class="register-btn" type="submit">Register</button>
@@ -286,6 +323,106 @@ form {
       document.getElementById('msg').innerHTML =
         '<div class="error-msg">' + decodeURIComponent(params.get('error')) + '</div>';
     }
+
+    // Real-time password validation
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm_password');
+    const passwordHint = document.getElementById('passwordHint');
+    const confirmHint = document.getElementById('confirmHint');
+    const submitBtn = document.querySelector('.register-btn');
+
+    function validatePassword() {
+      const password = passwordInput.value;
+      const isValid = password.length >= 6;
+
+      if (password.length === 0) {
+        passwordHint.classList.remove('valid', 'invalid');
+        passwordInput.classList.remove('valid', 'invalid');
+        passwordHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Password must be at least 6 characters</span>';
+      } else if (isValid) {
+        passwordHint.classList.remove('invalid');
+        passwordHint.classList.add('valid');
+        passwordInput.classList.remove('invalid');
+        passwordInput.classList.add('valid');
+        passwordHint.innerHTML = '<i class="fas fa-check-circle"></i><span>Password is strong enough</span>';
+      } else {
+        passwordHint.classList.remove('valid');
+        passwordHint.classList.add('invalid');
+        passwordInput.classList.remove('valid');
+        passwordInput.classList.add('invalid');
+        passwordHint.innerHTML = '<i class="fas fa-times-circle"></i><span>Password must be at least 6 characters</span>';
+      }
+
+      validateConfirmPassword();
+      updateSubmitButton();
+    }
+
+    function validateConfirmPassword() {
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+
+      if (confirm.length === 0) {
+        confirmHint.classList.remove('valid', 'invalid');
+        confirmInput.classList.remove('valid', 'invalid');
+        confirmHint.innerHTML = '<i class="fas fa-info-circle"></i><span>Passwords must match</span>';
+      } else if (password === confirm && password.length >= 6) {
+        confirmHint.classList.remove('invalid');
+        confirmHint.classList.add('valid');
+        confirmInput.classList.remove('invalid');
+        confirmInput.classList.add('valid');
+        confirmHint.innerHTML = '<i class="fas fa-check-circle"></i><span>Passwords match!</span>';
+      } else {
+        confirmHint.classList.remove('valid');
+        confirmHint.classList.add('invalid');
+        confirmInput.classList.remove('valid');
+        confirmInput.classList.add('invalid');
+        confirmHint.innerHTML = '<i class="fas fa-times-circle"></i><span>Passwords do not match</span>';
+      }
+
+      updateSubmitButton();
+    }
+
+    function updateSubmitButton() {
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+      const isPasswordValid = password.length >= 6;
+      const doPasswordsMatch = password === confirm;
+
+      if (isPasswordValid && doPasswordsMatch) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.6';
+        submitBtn.style.cursor = 'not-allowed';
+      }
+    }
+
+    // Add event listeners
+    passwordInput.addEventListener('input', validatePassword);
+    confirmInput.addEventListener('input', validateConfirmPassword);
+
+    // Initial validation state
+    updateSubmitButton();
+
+    // Prevent form submission if passwords don't match
+    document.querySelector('form').addEventListener('submit', (e) => {
+      const password = passwordInput.value;
+      const confirm = confirmInput.value;
+
+      if (password.length < 6) {
+        e.preventDefault();
+        alert('Password must be at least 6 characters long.');
+        return false;
+      }
+
+      if (password !== confirm) {
+        e.preventDefault();
+        alert('Passwords do not match. Please check and try again.');
+        return false;
+      }
+    });
   </script>
 </body>
 </html>
