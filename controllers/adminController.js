@@ -1,8 +1,5 @@
 // Admin Controller for IoT Charging Device Management
 
-export const adminDashboard = (req, res) => {
-  res.render("admin-dashboard");
-};
 
 export const chargingStation = (req, res) => {
   res.render("charging-station");

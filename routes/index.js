@@ -1,5 +1,4 @@
 import express from "express";
-import { homePage } from "../controllers/homeController.js";
 import { chargingStation } from "../controllers/adminController.js";
 import { 
   registerUser, 
@@ -181,7 +180,6 @@ router.post('/api/verify-otp', async (req, res) => {
 });
 
 // Protected routes
-router.get("/home", requireLogin, homePage);
 router.get("/charging-station", requireLogin, chargingStation);
 router.get("/transaction-history", requireLogin, (req, res) => {
   res.render("transaction-history");
