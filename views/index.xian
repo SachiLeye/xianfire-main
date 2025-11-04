@@ -399,11 +399,11 @@
     </div>
 
     <div class="action-buttons" id="actionButtons">
-      <button class="btn btn-primary" onclick="usePoints()">
+      <button class="btn btn-primary" id="usePointsBtn">
         <i class="fas fa-bolt"></i>
         Use Points to Charge
       </button>
-      <button class="btn btn-secondary" onclick="cancelScan()">
+      <button class="btn btn-secondary" id="cancelBtn">
         <i class="fas fa-times"></i>
         Cancel
       </button>
@@ -544,6 +544,10 @@
         rfidInput.focus();
       }
     });
+
+    // Add event listeners to buttons
+    document.getElementById('usePointsBtn').addEventListener('click', usePoints);
+    document.getElementById('cancelBtn').addEventListener('click', cancelScan);
   </script>
 </body>
 </html>
