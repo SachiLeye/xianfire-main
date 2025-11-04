@@ -1,7 +1,18 @@
 import express from "express";
 import { homePage } from "../controllers/homeController.js";
 import { chargingStation } from "../controllers/adminController.js";
-import { registerUser, loginUser, getStudentByRFID, addPoints, getCurrentStudent } from "../controllers/firebaseController.js";
+import { 
+  registerUser, 
+  loginUser, 
+  getStudentByRFID, 
+  addPoints, 
+  getCurrentStudent,
+  startChargingSession,
+  stopChargingSession,
+  getStudentTransactionHistory,
+  getActiveChargingSession,
+  getAllTransactions
+} from "../controllers/firebaseController.js";
 import { query, where, getDocs } from 'firebase/firestore';
 import bcrypt from 'bcrypt';
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -172,6 +183,9 @@ router.post('/api/verify-otp', async (req, res) => {
 // Protected routes
 router.get("/home", requireLogin, homePage);
 router.get("/charging-station", requireLogin, chargingStation);
+router.get("/transaction-history", requireLogin, (req, res) => {
+  res.render("transaction-history");
+});
 router.get("/user-dashboard", requireLogin, (req, res) => {
   res.send(`<!DOCTYPE html><html><head><meta http-equiv='refresh' content='0; url=/user-dashboard-page'></head><body><script>localStorage.setItem('rfid', '${req.session.rfid || ''}');</script></body></html>`);
 });
@@ -196,6 +210,13 @@ router.get("/user-dashboard-page", requireLogin, async (req, res) => {
 router.get("/api/student/:rfid", getStudentByRFID);
 router.post("/api/add-points", addPoints);
 router.get('/api/me', requireLogin, getCurrentStudent);
+
+// Transaction endpoints
+router.post('/api/transactions/start', requireLogin, startChargingSession);
+router.post('/api/transactions/stop', requireLogin, stopChargingSession);
+router.get('/api/transactions/history/:rfid?', requireLogin, getStudentTransactionHistory);
+router.get('/api/transactions/active/:rfid?', requireLogin, getActiveChargingSession);
+router.get('/api/transactions/all', requireLogin, getAllTransactions);
 
 // Reset password by email (used after OTP verification)
 router.post('/api/reset-password', async (req, res) => {

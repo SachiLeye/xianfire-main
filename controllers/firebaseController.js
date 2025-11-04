@@ -3,6 +3,7 @@ import { collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs } fro
 import bcrypt from "bcrypt";
 import { authAdmin, adminAvailable } from "../models/firebaseAdmin.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { TransactionModel } from "../models/transactionModel.js";
 
 export const registerUser = async (req, res) => {
   const { name, email, password, rfid, section, year, contact } = req.body;
@@ -166,5 +167,209 @@ export const addPoints = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+// ============ TRANSACTION ENDPOINTS ============
+
+/**
+ * Start a new charging session (create transaction)
+ */
+export const startChargingSession = async (req, res) => {
+  try {
+    const { rfid, pointsToSpend, socketType, socketNumber } = req.body;
+
+    // Validate required fields
+    if (!rfid || !pointsToSpend || !socketType || !socketNumber) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Missing required fields" 
+      });
+    }
+
+    // Get student data
+    const studentRef = doc(db, "students", rfid);
+    const studentDoc = await getDoc(studentRef);
+
+    if (!studentDoc.exists()) {
+      return res.status(404).json({ 
+        success: false, 
+        error: "Student not found" 
+      });
+    }
+
+    const studentData = studentDoc.data();
+
+    // Check if there's already an active transaction
+    const activeTransaction = await TransactionModel.getActiveTransaction(rfid);
+    if (activeTransaction) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "You already have an active charging session" 
+      });
+    }
+
+    // Calculate expected end time (120 seconds per point = 2 minutes per point)
+    const durationSeconds = pointsToSpend * 120;
+    const expectedEndTime = new Date(Date.now() + durationSeconds * 1000);
+
+    // Create transaction
+    const transactionId = await TransactionModel.createTransaction({
+      rfid,
+      studentName: studentData.name,
+      email: studentData.email,
+      pointsToSpend,
+      socketType,
+      socketNumber,
+      expectedEndTime
+    });
+
+    // Get updated student data
+    const updatedStudentDoc = await getDoc(studentRef);
+    const updatedStudentData = updatedStudentDoc.data();
+
+    res.json({ 
+      success: true, 
+      transactionId,
+      remainingPoints: updatedStudentData.points,
+      expectedDuration: durationSeconds,
+      message: "Charging session started successfully"
+    });
+  } catch (err) {
+    console.error("Error starting charging session:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Stop/Complete a charging session
+ */
+export const stopChargingSession = async (req, res) => {
+  try {
+    const { transactionId, status } = req.body;
+
+    if (!transactionId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Transaction ID is required" 
+      });
+    }
+
+    const finalStatus = status === "cancelled" ? "cancelled" : "completed";
+
+    const updatedTransaction = await TransactionModel.completeTransaction(
+      transactionId, 
+      finalStatus
+    );
+
+    // Get updated student data
+    const studentRef = doc(db, "students", updatedTransaction.rfid);
+    const studentDoc = await getDoc(studentRef);
+    const studentData = studentDoc.data();
+
+    res.json({ 
+      success: true, 
+      transaction: updatedTransaction,
+      remainingPoints: studentData.points,
+      message: `Charging session ${finalStatus} successfully`
+    });
+  } catch (err) {
+    console.error("Error stopping charging session:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Get student's transaction history
+ */
+export const getStudentTransactionHistory = async (req, res) => {
+  try {
+    const rfid = req.params.rfid || req.session?.rfid;
+
+    if (!rfid) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Not authenticated" 
+      });
+    }
+
+    const transactions = await TransactionModel.getStudentTransactions(rfid);
+    const stats = await TransactionModel.getStudentStats(rfid);
+
+    res.json({ 
+      success: true, 
+      transactions,
+      stats
+    });
+  } catch (err) {
+    console.error("Error getting transaction history:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Get active charging session for a student
+ */
+export const getActiveChargingSession = async (req, res) => {
+  try {
+    const rfid = req.params.rfid || req.session?.rfid;
+
+    if (!rfid) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Not authenticated" 
+      });
+    }
+
+    const activeTransaction = await TransactionModel.getActiveTransaction(rfid);
+
+    res.json({ 
+      success: true, 
+      activeTransaction
+    });
+  } catch (err) {
+    console.error("Error getting active session:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Get all transactions (admin only)
+ */
+export const getAllTransactions = async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.session?.role !== "admin") {
+      return res.status(403).json({ 
+        success: false, 
+        error: "Unauthorized - Admin access required" 
+      });
+    }
+
+    const limit = parseInt(req.query.limit) || 100;
+    const transactions = await TransactionModel.getAllTransactions(limit);
+
+    res.json({ 
+      success: true, 
+      transactions
+    });
+  } catch (err) {
+    console.error("Error getting all transactions:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
   }
 };

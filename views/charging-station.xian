@@ -424,6 +424,56 @@
     let selectedSocket = 1;
     let chargingInterval = null;
     let remainingSeconds = 0;
+    let currentTransactionId = null;
+    let currentStudentRFID = null;
+
+    // Load student data and check for active session on page load
+    async function loadStudentData() {
+      try {
+        const response = await fetch('/api/me');
+        const data = await response.json();
+        
+        if (data.rfid) {
+          currentStudentRFID = data.rfid;
+          document.getElementById("studentId").value = data.rfid;
+          document.getElementById("displayStudentId").textContent = data.rfid;
+          document.getElementById("displayName").textContent = data.name || 'N/A';
+          document.getElementById("displayPoints").textContent = data.points || 0;
+          document.getElementById("displayLastUsed").textContent = 
+            data.lastUsed ? new Date(data.lastUsed.seconds * 1000).toLocaleDateString() : 'Never';
+          document.getElementById("pointsToSpend").max = data.points || 0;
+        }
+
+        // Check for active session
+        const activeResponse = await fetch(`/api/transactions/active/${data.rfid}`);
+        const activeData = await activeResponse.json();
+        
+        if (activeData.success && activeData.activeTransaction) {
+          resumeActiveSession(activeData.activeTransaction);
+        }
+      } catch (error) {
+        console.error('Error loading student data:', error);
+      }
+    }
+
+    // Resume an active charging session
+    function resumeActiveSession(transaction) {
+      currentTransactionId = transaction.id;
+      const startTime = transaction.startTime.seconds * 1000;
+      const expectedDuration = transaction.pointsUsed * 120;
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      remainingSeconds = Math.max(0, expectedDuration - elapsed);
+
+      if (remainingSeconds > 0) {
+        document.getElementById("controlPanel").style.display = "none";
+        document.getElementById("timerDisplay").classList.add("active");
+        updateTimer();
+        startCountdown();
+      } else {
+        // Session should have ended, complete it
+        stopCharging(true);
+      }
+    }
 
     function selectSocket(socketNumber) {
       selectedSocket = socketNumber;
@@ -432,7 +482,7 @@
       });
     }
 
-    function startCharging() {
+    async function startCharging() {
       const studentId = document.getElementById("studentId").value;
       const pointsToSpend = parseInt(document.getElementById("pointsToSpend").value);
 
@@ -447,17 +497,56 @@
         return;
       }
 
-      document.getElementById("controlPanel").style.display = "none";
-      document.getElementById("timerDisplay").classList.add("active");
+      // Determine socket type
+      const socketType = selectedSocket === 1 ? "Universal Charger" : "Own Charger";
 
-      remainingSeconds = pointsToSpend * 120;
-      updateTimer();
+      try {
+        // Start charging session via API
+        const response = await fetch('/api/transactions/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            rfid: studentId,
+            pointsToSpend: pointsToSpend,
+            socketType: socketType,
+            socketNumber: selectedSocket
+          })
+        });
 
+        const data = await response.json();
+
+        if (data.success) {
+          currentTransactionId = data.transactionId;
+          
+          // Update UI
+          document.getElementById("displayPoints").textContent = data.remainingPoints;
+          document.getElementById("controlPanel").style.display = "none";
+          document.getElementById("timerDisplay").classList.add("active");
+
+          // Start timer
+          remainingSeconds = data.expectedDuration;
+          updateTimer();
+          startCountdown();
+
+          // Add to usage log
+          addToUsageLog(studentId, pointsToSpend, socketType);
+        } else {
+          alert(data.error || "Failed to start charging session");
+        }
+      } catch (error) {
+        console.error('Error starting charging:', error);
+        alert("Error starting charging session. Please try again.");
+      }
+    }
+
+    function startCountdown() {
       chargingInterval = setInterval(() => {
         remainingSeconds--;
         updateTimer();
         if (remainingSeconds <= 0) {
-          stopCharging();
+          stopCharging(true);
           alert("Charging completed!");
         }
       }, 1000);
@@ -469,16 +558,59 @@
       document.getElementById("timerValue").textContent = `${min}:${sec}`;
     }
 
-    function stopCharging() {
+    async function stopCharging(completed = false) {
       clearInterval(chargingInterval);
       chargingInterval = null;
 
-      const usedPoints = parseInt(document.getElementById("pointsToSpend").value);
-      const currentPoints = parseInt(document.getElementById("displayPoints").textContent);
-      document.getElementById("displayPoints").textContent = currentPoints - usedPoints;
+      if (!currentTransactionId) {
+        document.getElementById("controlPanel").style.display = "block";
+        document.getElementById("timerDisplay").classList.remove("active");
+        return;
+      }
 
-      document.getElementById("controlPanel").style.display = "block";
-      document.getElementById("timerDisplay").classList.remove("active");
+      try {
+        // Stop charging session via API
+        const response = await fetch('/api/transactions/stop', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            transactionId: currentTransactionId,
+            status: completed ? "completed" : "cancelled"
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Update remaining points display
+          document.getElementById("displayPoints").textContent = data.remainingPoints;
+          
+          if (!completed) {
+            alert(`Charging ${data.transaction.status}! ${data.transaction.pointsRefunded ? 'Points refunded: ' + data.transaction.pointsRefunded : ''}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error stopping charging:', error);
+      } finally {
+        currentTransactionId = null;
+        document.getElementById("controlPanel").style.display = "block";
+        document.getElementById("timerDisplay").classList.remove("active");
+      }
+    }
+
+    function addToUsageLog(studentId, points, socket) {
+      const table = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+      const row = table.insertRow(0);
+      const now = new Date().toLocaleTimeString();
+      
+      row.innerHTML = `
+        <td>${studentId}</td>
+        <td>${points}</td>
+        <td>${socket}</td>
+        <td>${now}</td>
+      `;
     }
 
     // Logout Modal Functions
@@ -493,6 +625,11 @@
     function confirmLogout() {
       window.location.href = '/logout';
     }
+
+    // Load student data on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStudentData();
+    });
 
     // Prevent browser back button from going to unauthorized pages
     (function() {

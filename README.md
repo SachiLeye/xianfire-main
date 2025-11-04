@@ -15,6 +15,8 @@ Designed for **fast prototyping**, **student projects**, **desktop applications*
 
 ✅ Express.js server with session-based auth  
 ✅ MySQL (Sequelize) or MongoDB (Mongoose) support  
+✅ **Firebase Firestore integration**  
+✅ **Complete Transaction Tracking System**  
 ✅ **Electron desktop app integration**  
 ✅ Auto-generated CRUD templates  
 ✅ CLI generator for models & controllers (`create:model`, `create:controller`)  
@@ -182,6 +184,27 @@ Render views with `res.render("filename")` — no complex templating needed.
 - Connection handled in `migrate.js`
 - Models use `mongoose.Schema`
 - Migration ensures collections exist
+
+#### 🔥 Firebase Firestore
+
+- Real-time NoSQL cloud database
+- Automatic syncing and offline support
+- Built-in authentication integration
+- Transaction tracking system included
+
+**Transaction System Features:**
+- ✅ Complete charging session tracking
+- ✅ Points management with auto-deduction
+- ✅ Transaction history with statistics
+- ✅ Status tracking (in-progress, completed, cancelled)
+- ✅ Automatic refunds for cancelled sessions
+- ✅ Real-time data synchronization
+- ✅ Resume interrupted sessions
+
+📖 **Documentation:**
+- [Transaction System Guide](TRANSACTION_SYSTEM.md)
+- [Setup Instructions](SETUP_GUIDE.md)
+- [Database Structure](DATABASE_STRUCTURE.md)
 
 
 ### 4. 🖥️ Electron Desktop App (Optional)
