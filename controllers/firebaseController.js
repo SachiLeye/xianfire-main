@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { authAdmin, adminAvailable } from "../models/firebaseAdmin.js";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { TransactionModel } from "../models/transactionModel.js";
+import { turnOnSocket, turnOffSocket } from "../utils/gpioControl.js";
 
 export const registerUser = async (req, res) => {
   const { name, email, password, rfid, section, year, contact } = req.body;
@@ -228,6 +229,9 @@ export const startChargingSession = async (req, res) => {
     const updatedStudentDoc = await getDoc(studentRef);
     const updatedStudentData = updatedStudentDoc.data();
 
+    // ✅ TURN GPIO HIGH
+    turnOnSocket(socketNumber);
+
     res.json({ 
       success: true, 
       transactionId,
@@ -269,6 +273,9 @@ export const stopChargingSession = async (req, res) => {
     const studentRef = doc(db, "students", updatedTransaction.rfid);
     const studentDoc = await getDoc(studentRef);
     const studentData = studentDoc.data();
+
+    turnOffSocket(socketNumber);
+    
 
     res.json({ 
       success: true, 
