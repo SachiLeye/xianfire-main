@@ -220,6 +220,7 @@ export const startChargingSession = async (req, res) => {
       studentName: studentData.name,
       email: studentData.email,
       pointsToSpend,
+      socketNumber,
       socketType,
       socketNumber,
       expectedEndTime
@@ -264,8 +265,17 @@ export const stopChargingSession = async (req, res) => {
 
     const finalStatus = status === "cancelled" ? "cancelled" : "completed";
 
+    // Fetch the transaction to get socketNumber
+    const activeTransaction = await TransactionModel.getTransactionById(transactionId);
+    if (!activeTransaction) {
+      return res.status(404).json({ success: false, error: "Transaction not found" });
+    }
+
+    const socketNumber = activeTransaction.socketNumber;
+
+    // Mark the transaction as completed/cancelled
     const updatedTransaction = await TransactionModel.completeTransaction(
-      transactionId, 
+      transactionId,
       finalStatus
     );
 
@@ -274,8 +284,8 @@ export const stopChargingSession = async (req, res) => {
     const studentDoc = await getDoc(studentRef);
     const studentData = studentDoc.data();
 
+    // ✅ TURN GPIO OFF
     turnOffSocket(socketNumber);
-    
 
     res.json({ 
       success: true, 
