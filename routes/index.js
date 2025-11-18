@@ -10,7 +10,11 @@ import {
   stopChargingSession,
   getStudentTransactionHistory,
   getActiveChargingSession,
-  getAllTransactions
+  getAllTransactions,
+  markAttendance,
+  getTodayAttendance,
+  getAttendanceBySection,
+  getStudentAttendance
 } from "../controllers/firebaseController.js";
 import { query, where, getDocs } from 'firebase/firestore';
 import bcrypt from 'bcrypt';
@@ -181,6 +185,9 @@ router.post('/api/verify-otp', async (req, res) => {
 
 // Protected routes
 router.get("/charging-station", requireLogin, chargingStation);
+router.get("/attendance-scanner", (req, res) => {
+  res.render("attendance-scanner.xian");
+});
 router.get("/transaction-history", requireLogin, (req, res) => {
   res.render("transaction-history");
 });
@@ -215,6 +222,12 @@ router.post('/api/transactions/stop', requireLogin, stopChargingSession);
 router.get('/api/transactions/history/:rfid?', requireLogin, getStudentTransactionHistory);
 router.get('/api/transactions/active/:rfid?', requireLogin, getActiveChargingSession);
 router.get('/api/transactions/all', requireLogin, getAllTransactions);
+
+// Attendance endpoints
+router.post('/api/attendance/mark', markAttendance);
+router.get('/api/attendance/today', getTodayAttendance);
+router.get('/api/attendance/by-section', getAttendanceBySection);
+router.get('/api/attendance/student/:rfid?', requireLogin, getStudentAttendance);
 
 // Reset password by email (used after OTP verification)
 router.post('/api/reset-password', async (req, res) => {

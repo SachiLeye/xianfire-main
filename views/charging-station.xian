@@ -371,14 +371,14 @@
       <div>╔════════════════════════════╗<br>║ STUDENT CHARGING DEVICE ║<br>╚════════════════════════════╝</div>
 
       <div class="student-info">
-        <div class="info-row"><span>STUDENT ID:</span><span class="info-value" id="displayStudentId">2021-12345</span></div>
-        <div class="info-row"><span>NAME:</span><span class="info-value" id="displayName">JUAN DELA CRUZ</span></div>
-        <div class="info-row"><span>LAST USED:</span><span class="info-value" id="displayLastUsed">2025-10-20</span></div>
+        <div class="info-row"><span>STUDENT ID:</span><span class="info-value" id="displayStudentId">Loading...</span></div>
+        <div class="info-row"><span>NAME:</span><span class="info-value" id="displayName">Loading...</span></div>
+        <div class="info-row"><span>LAST USED:</span><span class="info-value" id="displayLastUsed">Loading...</span></div>
       </div>
 
       <div class="points-display">
         <div class="points-label">AVAILABLE POINTS</div>
-        <div class="points-value" id="displayPoints">150</div>
+        <div class="points-value" id="displayPoints">0</div>
       </div>
     </div>
 
@@ -388,12 +388,12 @@
       <div class="input-row">
         <div class="input-group">
           <label for="studentId">Student RFID</label>
-          <input type="text" id="studentId" placeholder="Enter RFID" value="2021-12345" />
+          <input type="text" id="studentId" placeholder="Enter RFID" value="" readonly />
         </div>
 
         <div class="input-group">
           <label for="pointsToSpend">Points to Spend</label>
-          <input type="number" id="pointsToSpend" placeholder="Enter Points" min="1" max="150" value="10" />
+          <input type="number" id="pointsToSpend" placeholder="Enter Points" min="1" max="0" value="10" />
         </div>
       </div>
 
@@ -457,6 +457,12 @@
         const response = await fetch('/api/me');
         const data = await response.json();
         
+        if (data.error) {
+          // User not authenticated, redirect to login
+          window.location.href = '/login';
+          return;
+        }
+
         if (data.rfid) {
           currentStudentRFID = data.rfid;
           document.getElementById("studentId").value = data.rfid;
@@ -477,6 +483,8 @@
         }
       } catch (error) {
         console.error('Error loading student data:', error);
+        // If there's an error, likely not authenticated
+        window.location.href = '/login';
       }
     }
 

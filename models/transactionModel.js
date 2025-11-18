@@ -257,6 +257,30 @@ export class TransactionModel {
   }
 
   /**
+   * Get a specific transaction by ID
+   * @param {string} transactionId - The transaction ID
+   * @returns {Promise<Object|null>} - Transaction data or null
+   */
+  static async getTransactionById(transactionId) {
+    try {
+      const transactionRef = doc(db, "transactions", transactionId);
+      const transactionDoc = await getDoc(transactionRef);
+
+      if (!transactionDoc.exists()) {
+        return null;
+      }
+
+      return {
+        id: transactionDoc.id,
+        ...transactionDoc.data()
+      };
+    } catch (error) {
+      console.error("Error getting transaction by ID:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Get transaction statistics for a student
    * @param {string} rfid - Student RFID
    * @returns {Promise<Object>} - Transaction statistics

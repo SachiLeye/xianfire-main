@@ -390,3 +390,230 @@ export const getAllTransactions = async (req, res) => {
     });
   }
 };
+
+// ============ ATTENDANCE ENDPOINTS ============
+
+/**
+ * Mark attendance for a student
+ * Adds 10 points once per day
+ */
+export const markAttendance = async (req, res) => {
+  try {
+    const { rfid } = req.body;
+
+    if (!rfid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "RFID is required" 
+      });
+    }
+
+    // Get student data
+    const studentRef = doc(db, "students", rfid);
+    const studentDoc = await getDoc(studentRef);
+
+    if (!studentDoc.exists()) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Student not registered. Please register first." 
+      });
+    }
+
+    const studentData = studentDoc.data();
+
+    // Check if student already checked in today
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const attendanceRef = collection(db, "attendance");
+    const q = query(
+      attendanceRef,
+      where("rfid", "==", rfid),
+      where("date", "==", todayStart.toISOString().split('T')[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      return res.json({ 
+        success: true,
+        message: "Already checked in today",
+        pointsAdded: 0,
+        newPoints: studentData.points
+      });
+    }
+
+    // Add 10 points to student
+    const newPoints = (studentData.points || 0) + 10;
+    await updateDoc(studentRef, { points: newPoints });
+
+    // Create attendance record
+    const attendanceDoc = doc(attendanceRef);
+    await setDoc(attendanceDoc, {
+      rfid,
+      studentName: studentData.name,
+      email: studentData.email,
+      section: studentData.section || null,
+      year: studentData.year || null,
+      pointsAdded: 10,
+      date: todayStart.toISOString().split('T')[0],
+      timestamp: new Date()
+    });
+
+    res.json({ 
+      success: true,
+      message: "Attendance marked successfully! +10 points",
+      pointsAdded: 10,
+      newPoints
+    });
+  } catch (err) {
+    console.error("Error marking attendance:", err);
+    res.status(500).json({ 
+      success: false, 
+      message: err.message 
+    });
+  }
+};
+
+/**
+ * Get today's attendance records
+ */
+export const getTodayAttendance = async (req, res) => {
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const attendanceRef = collection(db, "attendance");
+    const q = query(
+      attendanceRef,
+      where("date", "==", todayStart.toISOString().split('T')[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+    const attendance = [];
+
+    querySnapshot.forEach((doc) => {
+      attendance.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort by timestamp descending (most recent first)
+    attendance.sort((a, b) => {
+      const aTime = a.timestamp?.seconds || 0;
+      const bTime = b.timestamp?.seconds || 0;
+      return bTime - aTime;
+    });
+
+    res.json({ 
+      success: true, 
+      attendance
+    });
+  } catch (err) {
+    console.error("Error getting today's attendance:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Get all attendance records filtered by section and year
+ */
+export const getAttendanceBySection = async (req, res) => {
+  try {
+    const { section, year } = req.query;
+
+    const attendanceRef = collection(db, "attendance");
+    let q = attendanceRef;
+
+    // Build query based on filters
+    const constraints = [];
+    if (section) {
+      constraints.push(where("section", "==", section));
+    }
+    if (year) {
+      constraints.push(where("year", "==", year));
+    }
+
+    if (constraints.length > 0) {
+      q = query(attendanceRef, ...constraints);
+    }
+
+    const querySnapshot = await getDocs(q);
+    const attendance = [];
+
+    querySnapshot.forEach((doc) => {
+      attendance.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort by timestamp descending
+    attendance.sort((a, b) => {
+      const aTime = a.timestamp?.seconds || 0;
+      const bTime = b.timestamp?.seconds || 0;
+      return bTime - aTime;
+    });
+
+    res.json({ 
+      success: true, 
+      attendance
+    });
+  } catch (err) {
+    console.error("Error getting attendance by section:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
+
+/**
+ * Get student's attendance history
+ */
+export const getStudentAttendance = async (req, res) => {
+  try {
+    const rfid = req.params.rfid || req.session?.rfid;
+
+    if (!rfid) {
+      return res.status(401).json({ 
+        success: false, 
+        error: "Not authenticated" 
+      });
+    }
+
+    const attendanceRef = collection(db, "attendance");
+    const q = query(attendanceRef, where("rfid", "==", rfid));
+
+    const querySnapshot = await getDocs(q);
+    const attendance = [];
+
+    querySnapshot.forEach((doc) => {
+      attendance.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort by date descending
+    attendance.sort((a, b) => {
+      const aTime = a.timestamp?.seconds || 0;
+      const bTime = b.timestamp?.seconds || 0;
+      return bTime - aTime;
+    });
+
+    // Calculate stats
+    const totalDays = attendance.length;
+    const totalPoints = attendance.reduce((sum, record) => sum + (record.pointsAdded || 0), 0);
+
+    res.json({ 
+      success: true, 
+      attendance,
+      stats: {
+        totalDays,
+        totalPoints
+      }
+    });
+  } catch (err) {
+    console.error("Error getting student attendance:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: err.message 
+    });
+  }
+};
