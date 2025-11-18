@@ -499,12 +499,13 @@ body {
           <th>Socket Type</th>
           <th>Duration</th>
           <th>Points Used</th>
+          <th>Refunded</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody id="transactionTable">
         <tr>
-          <td colspan="5" style="text-align: center; padding: 20px;">
+          <td colspan="6" style="text-align: center; padding: 20px;">
             <i class="fas fa-spinner fa-spin"></i> Loading transactions...
           </td>
         </tr>
@@ -673,7 +674,7 @@ function updateTransactionTable(transactions) {
   if (!transactions || transactions.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align: center; padding: 20px; color: #6b7280;">
+        <td colspan="6" style="text-align: center; padding: 20px; color: #6b7280;">
           <i class="fas fa-inbox"></i><br>
           No transactions yet. Start your first charging session!
         </td>
@@ -705,6 +706,14 @@ function updateTransactionTable(transactions) {
       durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
     }
     
+    // Calculate refunded points for cancelled transactions
+    let refundedDisplay = '-';
+    if (txn.status === 'cancelled' && txn.pointsRefunded) {
+      refundedDisplay = `<span style="color: #059669; font-weight: 600;">+${txn.pointsRefunded}</span>`;
+    } else if (txn.status === 'cancelled' && txn.pointsRefunded === 0) {
+      refundedDisplay = '0';
+    }
+    
     // Status badge
     const statusClass = `status-${txn.status.replace(' ', '-')}`;
     const statusText = txn.status.charAt(0).toUpperCase() + txn.status.slice(1);
@@ -715,6 +724,7 @@ function updateTransactionTable(transactions) {
         <td><i class="fas fa-plug"></i> ${txn.socketType}</td>
         <td>${durationText}</td>
         <td>${txn.pointsUsed} pts</td>
+        <td>${refundedDisplay}</td>
         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
       </tr>
     `;
@@ -728,7 +738,7 @@ function showNoDataMessage() {
   const tbody = document.getElementById('transactionTable');
   tbody.innerHTML = `
     <tr>
-      <td colspan="5" style="text-align: center; padding: 20px; color: #dc2626;">
+      <td colspan="6" style="text-align: center; padding: 20px; color: #dc2626;">
         <i class="fas fa-exclamation-circle"></i><br>
         Error loading transaction data
       </td>

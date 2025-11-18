@@ -235,13 +235,14 @@
             <th>Socket Type</th>
             <th>Points Used</th>
             <th>Duration</th>
+            <th>Refunded</th>
             <th>Remaining Points</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody id="transactionsBody">
           <tr>
-            <td colspan="6" class="loading">
+            <td colspan="7" class="loading">
               <i class="fas fa-spinner fa-spin"></i> Loading transactions...
             </td>
           </tr>
@@ -288,7 +289,7 @@
       if (transactions.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="6" class="no-transactions">
+            <td colspan="7" class="no-transactions">
               <i class="fas fa-inbox"></i><br>
               No transactions found
             </td>
@@ -302,12 +303,21 @@
         const duration = txn.duration ? formatDuration(txn.duration) : 'N/A';
         const statusClass = `status-${txn.status.replace(' ', '-')}`;
         
+        // Calculate refunded points for cancelled transactions
+        let refundedDisplay = '-';
+        if (txn.status === 'cancelled' && txn.pointsRefunded) {
+          refundedDisplay = `<span style="color: #059669; font-weight: 600;">+${txn.pointsRefunded} pts</span>`;
+        } else if (txn.status === 'cancelled' && txn.pointsRefunded === 0) {
+          refundedDisplay = '0 pts';
+        }
+        
         return `
           <tr>
             <td>${startTime.toLocaleString()}</td>
             <td><i class="fas fa-plug"></i> ${txn.socketType}</td>
             <td>${txn.pointsUsed} pts</td>
             <td>${duration}</td>
+            <td>${refundedDisplay}</td>
             <td>${txn.remainingPoints} pts</td>
             <td>
               <span class="status-badge ${statusClass}">
@@ -347,7 +357,7 @@
       const tbody = document.getElementById('transactionsBody');
       tbody.innerHTML = `
         <tr>
-          <td colspan="6" class="no-transactions">
+          <td colspan="7" class="no-transactions">
             <i class="fas fa-exclamation-circle"></i><br>
             ${message}
           </td>
