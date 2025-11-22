@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charging Station - IoT Device</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+      min-height: 100vh;
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /*Main Container */
+    .charging-container {
+      background: #ffffffea;
+      border-radius: 16px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+      padding: 25px 20px;
+      max-width: 600px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      gap: 10px;
+      margin: 20px auto;
+    }
+
+    /* Header Controls */
+    .header-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .back-btn {
+      background: #e5e7eb;
+      color: #059669;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #d1fae5;
+    }
+
+    h1 {
+      text-align: center;
+      color: #059669;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* LCD Display Section */
+    .lcd-display {
+      background: #059669;
+      border-radius: 12px;
+      padding: 15px;
+      color: #d1fae5;
+      text-align: center;
+      font-family: "Courier New", monospace;
+      margin-bottom: 10px;
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .student-info {
+      border-radius: 8px;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .info-value {
+      font-weight: 700;
+      color: #d1fae5;
+    }
+
+    .points-display {
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .points-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .points-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .control-panel h3 {
+      color: #059669;
+      font-size: 16px;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Input Fields */
+    .input-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 15px;
+      align-items: center;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      max-width: 250px;
+    }
+
+    .input-group label {
+      font-size: 13px;
+      color: #374151;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .input-group input {
+      padding: 8px 10px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .input-group input::placeholder {
+      color: #9ca3af;
+    }
+
+    .input-group input:focus {
+      border-color: #10b981;
+    }
+
+    /* Socket Buttons */
+    .socket-selection {
+      display: flex;
+      justify-content: space-evenly;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .socket-btn {
+      background: #fff;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s ease;
+      flex: 1;
+    }
+
+    /* Remove hover when not active */
+    .socket-btn:not(.active):hover {
+      border-color: #e5e7eb;
+      transform: none;
+    }
+
+    .socket-btn.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-color: #10b981;
+    }
+
+    .socket-icon {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    /* Start Charging */
+    .start-charging-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .start-charging-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Timer Display */
+    .timer-display {
+      background: #059669;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      display: none;
+    }
+
+    .timer-display.active {
+      display: block;
+    }
+
+    .timer-label {
+      color: #d1fae5;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .timer-value {
+      color: #fff;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    /* Stop Button */
+    .stop-btn {
+      background: #ef4444;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s ease;
+      width: 100%;
+    }
+
+    .stop-btn:hover {
+      background: #dc2626;
+    }
+
+
+    /* Table */
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .log-table th,
+    .log-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .log-table th {
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .log-table tbody tr {
+      transition: background 0.2s;
+    }
+
+    .log-table tbody tr:hover {
+      background: #f0fdf4;
+    }
+
+    .log-table tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .log-table tr:nth-child(even):hover {
+      background: #f0fdf4;
+    }
+
+    .log-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+   .table-body-wrapper {
+  max-height: 130px; 
+  overflow-y: auto;
+}
+
+/* Optional: scrollbar styling */
+.table-body-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.table-body-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+
+
+    /* Logout Button */
+    .logout-btn {
+      background: #d32f2f;
+      color: #fff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: 0.3s ease;
+      align-self: center;
+      margin-top: 15px;
+    }
+
+    .logout-btn:hover {
+      background: #b71c1c;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .input-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .socket-selection {
+        flex-direction: column;
+      }
+
+      .logout-btn {
+        width: 45px;
+        padding: 10px;
+      }
+
+      .logout-btn::after {
+        content: "⇦";
+        font-size: 18px;
+      }
+
+      .logout-btn span {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="charging-container">
+    <div class="header-controls">
+      <button class="back-btn" id="backBtn">← Back to Dashboard</button>
+      <h1>⚡ Charging Station</h1>
+    </div>
+
+    <div class="lcd-display">
+      <div>╔════════════════════════════╗<br>║ STUDENT CHARGING DEVICE ║<br>╚════════════════════════════╝</div>
+
+      <div class="student-info">
+        <div class="info-row"><span>STUDENT ID:</span><span class="info-value" id="displayStudentId">Loading...</span></div>
+        <div class="info-row"><span>NAME:</span><span class="info-value" id="displayName">Loading...</span></div>
+        <div class="info-row"><span>LAST USED:</span><span class="info-value" id="displayLastUsed">Loading...</span></div>
+      </div>
+
+      <div class="points-display">
+        <div class="points-label">AVAILABLE POINTS</div>
+        <div class="points-value" id="displayPoints">0</div>
+      </div>
+    </div>
+
+    <div class="control-panel" id="controlPanel">
+      <h3>📝 Charging Configuration</h3>
+
+      <div class="input-row">
+        <div class="input-group">
+          <label for="studentId">Student RFID</label>
+          <input type="text" id="studentId" placeholder="Enter RFID" value="" readonly />
+        </div>
+
+        <div class="input-group">
+          <label for="pointsToSpend">Points to Spend</label>
+          <input type="number" id="pointsToSpend" placeholder="Enter Points" min="1" max="0" value="10" />
+        </div>
+      </div>
+
+      <div class="socket-selection">
+        <div class="socket-btn active" data-socket="1">
+          <div class="socket-icon">🔌</div>
+          <div>Universal Charger</div>
+        </div>
+        <div class="socket-btn" data-socket="2">
+          <div class="socket-icon">🔌</div>
+          <div>Own Charger</div>
+        </div>
+      </div>
+
+      <button class="start-charging-btn" id="startChargingBtn">⚡ START CHARGING</button>
+    </div>
+
+    <div class="timer-display" id="timerDisplay">
+      <div class="timer-label">⏱️ CHARGING IN PROGRESS</div>
+      <div class="timer-value" id="timerValue">05:00</div>
+      <button class="stop-btn" id="stopChargingBtn">⏹️ STOP CHARGING</button>
+    </div>
+
+ <table class="log-table">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Points Used</th>
+      <th>Socket</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+</table>
+<div class="table-body-wrapper">
+  <table class="log-table" id="usageLogTable">
+    <tbody></tbody>
+  </table>
+</div>
+
+
+    <button class="logout-btn" id="logoutBtn"><span>Logout</span></button>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logoutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+    <div style="background:#fff; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+      <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
+      <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="confirmLogoutBtn" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Logout</button>
+        <button id="cancelLogoutBtn" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+let selectedSocket = 1;
+let chargingInterval = null;
+let remainingSeconds = 0;
+let currentTransactionId = null;
+let currentStudentRFID = null;
+
+// --- Notification Function ---
+function showNotification(message, type = "success") {
+  let notification = document.getElementById("notification");
+  if (!notification) {
+    notification = document.createElement("div");
+    notification.id = "notification";
+    notification.style.position = "fixed";
+    notification.style.top = "20px";
+    notification.style.right = "20px";
+    notification.style.minWidth = "250px";
+    notification.style.padding = "12px 16px";
+    notification.style.borderRadius = "8px";
+    notification.style.color = "white";
+    notification.style.fontWeight = "600";
+    notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+    notification.style.display = "none";
+    notification.style.zIndex = "9999";
+    document.body.appendChild(notification);
+  }
+
+  notification.textContent = message;
+
+  if (type === "success") {
+    notification.style.background = "#10b981"; // green
+  } else if (type === "error") {
+    notification.style.background = "#ef4444"; // red
+  } else {
+    notification.style.background = "#6b7280"; // gray
+  }
+
+  notification.style.display = "block";
+  notification.style.opacity = "1";
+
+  setTimeout(() => {
+    notification.style.transition = "opacity 0.5s";
+    notification.style.opacity = "0";
+    setTimeout(() => {
+      notification.style.display = "none";
+      notification.style.transition = "";
+    }, 500);
+  }, 3000);
+}
+
+// --- Load Student Data ---
+async function loadStudentData() {
+  try {
+    const response = await fetch('/api/me');
+    const data = await response.json();
+    
+    if (data.error) {
+      window.location.href = '/login';
+      return;
+    }
+
+    if (data.rfid) {
+      currentStudentRFID = data.rfid;
+      document.getElementById("studentId").value = data.rfid;
+      document.getElementById("displayStudentId").textContent = data.rfid;
+      document.getElementById("displayName").textContent = data.name || 'N/A';
+      document.getElementById("displayPoints").textContent = data.points || 0;
+      document.getElementById("displayLastUsed").textContent = 
+        data.lastUsed ? new Date(data.lastUsed.seconds * 1000).toLocaleDateString() : 'Never';
+      document.getElementById("pointsToSpend").max = data.points || 0;
+    }
+
+    const activeResponse = await fetch(`/api/transactions/active/${data.rfid}`);
+    const activeData = await activeResponse.json();
+    
+    if (activeData.success && activeData.activeTransaction) {
+      resumeActiveSession(activeData.activeTransaction);
+    }
+  } catch (error) {
+    console.error('Error loading student data:', error);
+    window.location.href = '/login';
+  }
+}
+
+// --- Resume Active Session ---
+function resumeActiveSession(transaction) {
+  currentTransactionId = transaction.id;
+  selectedSocket = transaction.socketNumber || 1;
+
+  const startTime = transaction.startTime.seconds * 1000;
+  const expectedDuration = transaction.pointsUsed * 120;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  remainingSeconds = Math.max(0, expectedDuration - elapsed);
+
+  if (remainingSeconds > 0) {
+    document.querySelectorAll(".socket-btn").forEach((btn, index) => {
+      btn.classList.toggle("active", index + 1 === selectedSocket);
+    });
+
+    document.getElementById("controlPanel").style.display = "none";
+    document.getElementById("timerDisplay").classList.add("active");
+    updateTimer();
+    startCountdown();
+  } else {
+    stopCharging(true);
+  }
+}
+
+// --- Select Socket ---
+function selectSocket(socketNumber) {
+  selectedSocket = socketNumber;
+  document.querySelectorAll(".socket-btn").forEach((btn, index) => {
+    btn.classList.toggle("active", index + 1 === socketNumber);
+  });
+}
+
+// --- Start Charging ---
+async function startCharging() {
+  const studentId = document.getElementById("studentId").value;
+  const pointsToSpend = parseInt(document.getElementById("pointsToSpend").value);
+
+  if (!studentId || !pointsToSpend || pointsToSpend <= 0) {
+    showNotification("⚠️ Please enter valid details!", "error");
+    return;
+  }
+
+  const currentPoints = parseInt(document.getElementById("displayPoints").textContent);
+  if (pointsToSpend > currentPoints) {
+    showNotification("❌ Insufficient points!", "error");
+    return;
+  }
+
+  const socketType = selectedSocket === 1 ? "Universal Charger" : "Own Charger";
+
+  try {
+    const response = await fetch('/api/transactions/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rfid: studentId,
+        pointsToSpend: pointsToSpend,
+        socketType: socketType,
+        socketNumber: selectedSocket
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      currentTransactionId = data.transactionId;
+      document.getElementById("displayPoints").textContent = data.remainingPoints;
+      document.getElementById("controlPanel").style.display = "none";
+      document.getElementById("timerDisplay").classList.add("active");
+
+      remainingSeconds = data.expectedDuration;
+      updateTimer();
+      startCountdown();
+
+      addToUsageLog(studentId, pointsToSpend, socketType);
+      showNotification("✅ Charging started!", "success");
+    } else {
+      showNotification(data.error || "Failed to start charging session", "error");
+    }
+  } catch (error) {
+    console.error('Error starting charging:', error);
+    showNotification("Error starting charging session. Please try again.", "error");
+  }
+}
+
+// --- Countdown Timer ---
+function startCountdown() {
+  chargingInterval = setInterval(() => {
+    remainingSeconds--;
+    updateTimer();
+    if (remainingSeconds <= 0) {
+      stopCharging(true);
+      showNotification("✅ Charging completed!", "success");
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const min = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+  const sec = String(remainingSeconds % 60).padStart(2, "0");
+  document.getElementById("timerValue").textContent = `${min}:${sec}`;
+}
+
+// --- Stop Charging ---
+async function stopCharging(completed = false) {
+  clearInterval(chargingInterval);
+  chargingInterval = null;
+
+  if (!currentTransactionId) {
+    document.getElementById("controlPanel").style.display = "block";
+    document.getElementById("timerDisplay").classList.remove("active");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/transactions/stop', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transactionId: currentTransactionId,
+        status: completed ? "completed" : "cancelled"
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      document.getElementById("displayPoints").textContent = data.remainingPoints;
+      loadRecentTransactions();
+
+      if (!completed) {
+        showNotification(`Charging ${data.transaction.status}! ${data.transaction.pointsRefunded ? 'Points refunded: ' + data.transaction.pointsRefunded : ''}`, "success");
+      }
+    }
+  } catch (error) {
+    console.error('Error stopping charging:', error);
+    showNotification("Error stopping charging session.", "error");
+  } finally {
+    currentTransactionId = null;
+    document.getElementById("controlPanel").style.display = "block";
+    document.getElementById("timerDisplay").classList.remove("active");
+  }
+}
+
+// --- Usage Log ---
+function addToUsageLog(studentId, points, socket) {
+  const table = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+  const row = table.insertRow(0);
+  const now = new Date().toLocaleTimeString();
+
+  row.innerHTML = `
+    <td>${studentId}</td>
+    <td>${points}</td>
+    <td>${socket}</td>
+    <td>${now}</td>
+  `;
+
+  while (table.rows.length > 10) {
+    table.deleteRow(table.rows.length - 1);
+  }
+}
+
+// --- Load Recent Transactions ---
+async function loadRecentTransactions() {
+  try {
+    const response = await fetch('/api/transactions/history');
+    const data = await response.json();
+
+    const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+    if (data.success && data.transactions && data.transactions.length > 0) {
+      tbody.innerHTML = '';
+      const recentTransactions = data.transactions.slice(0, 10);
+      recentTransactions.forEach(txn => {
+        const row = tbody.insertRow();
+        const date = new Date(txn.startTime.seconds * 1000);
+        const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        row.innerHTML = `
+          <td>${txn.studentName || txn.rfid}</td>
+          <td>${txn.pointsUsed}</td>
+          <td>${txn.socketType}</td>
+          <td>${time}</td>
+        `;
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No recent transactions</td></tr>';
+    }
+  } catch (error) {
+    console.error('Error loading recent transactions:', error);
+  }
+}
+
+// --- Logout Modal ---
+function showLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'flex';
+}
+function hideLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'none';
+}
+function confirmLogout() {
+  window.location.href = '/logout';
+}
+
+// --- Initialize ---
+window.addEventListener('DOMContentLoaded', () => {
+  loadStudentData();
+  loadRecentTransactions();
+
+  document.getElementById('backBtn').addEventListener('click', () => window.location.href = '/user-dashboard');
+  document.getElementById('startChargingBtn').addEventListener('click', startCharging);
+  document.getElementById('stopChargingBtn').addEventListener('click', () => stopCharging(false));
+  document.getElementById('logoutBtn').addEventListener('click', showLogoutModal);
+  document.getElementById('confirmLogoutBtn').addEventListener('click', confirmLogout);
+  document.getElementById('cancelLogoutBtn').addEventListener('click', hideLogoutModal);
+
+  document.querySelectorAll('.socket-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectSocket(parseInt(btn.getAttribute('data-socket'))));
+  });
+});
+
+// --- Refresh transactions every 30 seconds ---
+setInterval(loadRecentTransactions, 30000);
+
+// --- Prevent back button from unauthorized pages ---
+(function() {
+  if (window.history && window.history.pushState) {
+    window.history.pushState('forward', null, window.location.href);
+    window.addEventListener('popstate', function() {
+      fetch('/api/session')
+        .then(res => res.json())
+        .then(data => {
+          if (data.authenticated) window.history.pushState('forward', null, window.location.href);
+          else window.location.href = '/login';
+        })
+        .catch(() => window.history.pushState('forward', null, window.location.href));
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

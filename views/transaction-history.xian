@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaction History - Charging Station</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+      min-height: 100vh;
+      padding: 30px 15px;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+.container {
+  width: 100%;
+  max-width: 1400px;
+  height: 950px; /* fixed height */
+  background: #ffffffd9;
+  margin: 30px auto;
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .back-btn {
+      background: #e5e7eb;
+      color: #059669;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background: #d1fae5;
+    }
+
+    h1 {
+      color: #059669;
+      font-size: 24px;
+      font-weight: 700;
+      text-align: center;
+      flex: 1;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .filters {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #10b981;
+      background: white;
+      color: #10b981;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-weight: 600;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: #10b981;
+      color: white;
+    }
+
+.table-body-wrapper {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.transactions-table thead th {
+  position: sticky;
+  top: 0;
+  background: #10b981;
+  color: white;
+  z-index: 2;
+}
+
+.table-body-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+    .transactions-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+    }
+
+    .transactions-table table {
+      width: 100%;
+    }
+
+    .transactions-table th,
+    .transactions-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .transactions-table th {
+      background: #10b981;
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    .transactions-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-completed {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .status-cancelled {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .status-in-progress {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .no-transactions {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #059669;
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .transactions-table {
+        font-size: 13px;
+      }
+
+      .stat-card {
+        padding: 15px;
+      }
+
+      .stat-value {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="window.location.href='/user-dashboard'">
+        <i class="fas fa-arrow-left"></i> Back
+      </button>
+      <h1><i class="fas fa-history"></i> Transaction History</h1>
+      <div style="width: 80px;"></div>
+    </div>
+
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-label">Total Sessions</div>
+        <div class="stat-value" id="totalSessions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Points Used</div>
+        <div class="stat-value" id="totalPoints">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="completedSessions">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg. Duration</div>
+        <div class="stat-value" id="avgDuration">0m</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTransactions('all')">All</button>
+      <button class="filter-btn" onclick="filterTransactions('completed')">Completed</button>
+      <button class="filter-btn" onclick="filterTransactions('cancelled')">Cancelled</button>
+      <button class="filter-btn" onclick="filterTransactions('in-progress')">In Progress</button>
+    </div>
+
+<div class="transactions-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Socket Type</th>
+        <th>Points Used</th>
+        <th>Duration</th>
+        <th>Refunded</th>
+        <th>Remaining Points</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+  </table>
+  <div class="table-body-wrapper">
+    <table>
+      <tbody id="transactionsBody">
+        <tr>
+          <td colspan="7" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+  <script>
+    let allTransactions = [];
+    let currentFilter = 'all';
+
+    // Load transaction data on page load
+    async function loadTransactions() {
+      try {
+        const response = await fetch('/api/transactions/history');
+        const data = await response.json();
+
+        if (data.success) {
+          allTransactions = data.transactions;
+          displayStats(data.stats);
+          displayTransactions(allTransactions);
+        } else {
+          showError(data.error || 'Failed to load transactions');
+        }
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        showError('Error loading transactions');
+      }
+    }
+
+    function displayStats(stats) {
+      document.getElementById('totalSessions').textContent = stats.totalSessions;
+      document.getElementById('totalPoints').textContent = stats.totalPointsUsed;
+      document.getElementById('completedSessions').textContent = stats.completedSessions;
+      
+      const avgMinutes = Math.floor(stats.averageDuration / 60);
+      document.getElementById('avgDuration').textContent = avgMinutes + 'm';
+    }
+
+    function displayTransactions(transactions) {
+      const tbody = document.getElementById('transactionsBody');
+      
+      if (transactions.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="no-transactions">
+              <i class="fas fa-inbox"></i><br>
+              No transactions found
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = transactions.map(txn => {
+        const startTime = new Date(txn.startTime.seconds * 1000);
+        const duration = txn.duration ? formatDuration(txn.duration) : 'N/A';
+        const statusClass = `status-${txn.status.replace(' ', '-')}`;
+        
+        // Calculate refunded points for cancelled transactions
+        let refundedDisplay = '-';
+        if (txn.status === 'cancelled' && txn.pointsRefunded) {
+          refundedDisplay = `<span style="color: #059669; font-weight: 600;">+${txn.pointsRefunded} pts</span>`;
+        } else if (txn.status === 'cancelled' && txn.pointsRefunded === 0) {
+          refundedDisplay = '0 pts';
+        }
+        
+        return `
+          <tr>
+            <td>${startTime.toLocaleString()}</td>
+            <td><i class="fas fa-plug"></i> ${txn.socketType}</td>
+            <td>${txn.pointsUsed} pts</td>
+            <td>${duration}</td>
+            <td>${refundedDisplay}</td>
+            <td>${txn.remainingPoints} pts</td>
+            <td>
+              <span class="status-badge ${statusClass}">
+                ${txn.status.toUpperCase()}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatDuration(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${minutes}m ${secs}s`;
+    }
+
+    function filterTransactions(filter) {
+      currentFilter = filter;
+      
+      // Update active button
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      // Filter transactions
+      let filtered = allTransactions;
+      if (filter !== 'all') {
+        filtered = allTransactions.filter(txn => txn.status === filter);
+      }
+
+      displayTransactions(filtered);
+    }
+
+    function showError(message) {
+      const tbody = document.getElementById('transactionsBody');
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="no-transactions">
+            <i class="fas fa-exclamation-circle"></i><br>
+            ${message}
+          </td>
+        </tr>
+      `;
+    }
+
+    // Load transactions on page load
+    window.addEventListener('DOMContentLoaded', loadTransactions);
+  </script>
+</body>
+</html>

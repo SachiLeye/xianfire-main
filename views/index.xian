@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XianFire - RFID Charging Station</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 50px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 64px;
+      color: #10b981;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      color: #059669;
+      font-size: 32px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 30px;
+      font-size: 16px;
+    }
+
+    .scan-section {
+      margin: 30px 0;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .input-group label {
+      display: block;
+      color: #374151;
+      font-size: 14px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .rfid-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 18px;
+      font-family: 'Courier New', monospace;
+      text-align: center;
+      transition: all 0.3s;
+      letter-spacing: 2px;
+    }
+
+    .rfid-input:focus {
+      outline: none;
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .scan-instruction {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: #6b7280;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+
+    .scan-instruction i {
+      color: #10b981;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .student-info {
+      display: none;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border-radius: 16px;
+      padding: 30px;
+      margin: 30px 0;
+      text-align: left;
+      border: 2px solid #10b981;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .student-info.show {
+      display: block;
+    }
+
+    .info-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #10b981;
+    }
+
+    .info-header i {
+      font-size: 48px;
+      color: #10b981;
+    }
+
+    .info-header-text h2 {
+      color: #059669;
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .info-header-text p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #a7f3d0;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #059669;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .info-value {
+      color: #374151;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .points-display {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 15px;
+      text-align: center;
+    }
+
+    .points-display .points-label {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .points-display .points-value {
+      font-size: 42px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .action-buttons {
+      display: none;
+      margin-top: 30px;
+      gap: 15px;
+    }
+
+    .action-buttons.show {
+      display: flex;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+      transform: translateY(-2px);
+    }
+
+    .error-message {
+      display: none;
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+      border: 2px solid #fca5a5;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #e5e7eb;
+      border-top: 4px solid #10b981;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .login-link {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .login-link a {
+      color: #059669;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .login-link a:hover {
+      color: #10b981;
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <i class="fas fa-charging-station"></i>
+    </div>
+    <h1>⚡ XianFire Charging Station</h1>
+    <p class="subtitle">Student Points-Based Charging System</p>
+
+    <div class="scan-section">
+      <div class="input-group">
+        <label for="rfidInput">
+          <i class="fas fa-id-card"></i> Scan Your RFID Card
+        </label>
+        <input 
+          type="text" 
+          id="rfidInput" 
+          class="rfid-input" 
+          placeholder="Place card on reader..."
+          autocomplete="off"
+          autofocus
+        >
+      </div>
+      <div class="scan-instruction">
+        <i class="fas fa-wifi"></i>
+        <span>Waiting for RFID scan...</span>
+      </div>
+    </div>
+
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px; color: #6b7280;">Reading card...</p>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="student-info" id="studentInfo">
+      <div class="info-header">
+        <i class="fas fa-user-check"></i>
+        <div class="info-header-text">
+          <h2 id="studentName">Loading...</h2>
+          <p>Scan Successful</p>
+        </div>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value" id="studentEmail">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">RFID:</span>
+        <span class="info-value" id="studentRFID">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Section:</span>
+        <span class="info-value" id="studentSection">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Year:</span>
+        <span class="info-value" id="studentYear">-</span>
+      </div>
+
+      <div class="points-display">
+        <div class="points-label">Available Points</div>
+        <div class="points-value">
+          <i class="fas fa-coins"></i>
+          <span id="studentPoints">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons" id="actionButtons">
+      <button class="btn btn-primary" id="usePointsBtn">
+        <i class="fas fa-bolt"></i>
+        Use Points to Charge
+      </button>
+      <button class="btn btn-secondary" id="cancelBtn">
+        <i class="fas fa-times"></i>
+        Cancel
+      </button>
+    </div>
+
+    <div class="login-link">
+      <p style="color: #6b7280; font-size: 14px; margin-bottom: 10px;">
+        Already have an account?
+      </p>
+      <a href="/login">
+        <i class="fas fa-sign-in-alt"></i> Login to Your Account
+      </a>
+    </div>
+  </div>
+
+  <script>
+    let currentStudent = null;
+    let scanTimeout = null;
+
+    const rfidInput = document.getElementById('rfidInput');
+    const studentInfo = document.getElementById('studentInfo');
+    const actionButtons = document.getElementById('actionButtons');
+    const errorMessage = document.getElementById('errorMessage');
+    const loading = document.querySelector('.loading');
+
+    // Auto-focus on input when page loads
+    window.addEventListener('load', () => {
+      rfidInput.focus();
+    });
+
+    // Listen for RFID input
+    rfidInput.addEventListener('input', () => {
+      // Clear previous timeout
+      if (scanTimeout) {
+        clearTimeout(scanTimeout);
+      }
+
+      // Set new timeout - RFID readers typically input data quickly
+      scanTimeout = setTimeout(() => {
+        const rfid = rfidInput.value.trim();
+        if (rfid.length > 0) {
+          scanRFID(rfid);
+        }
+      }, 500); // Wait 500ms after last character
+    });
+
+    // Also trigger on Enter key
+    rfidInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        if (scanTimeout) {
+          clearTimeout(scanTimeout);
+        }
+        const rfid = rfidInput.value.trim();
+        if (rfid.length > 0) {
+          scanRFID(rfid);
+        }
+      }
+    });
+
+    async function scanRFID(rfid) {
+      // Show loading
+      loading.classList.add('show');
+      studentInfo.classList.remove('show');
+      actionButtons.classList.remove('show');
+      errorMessage.classList.remove('show');
+
+      try {
+        const response = await fetch(`/api/student/${rfid}`);
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('RFID not found. Please register first.');
+          }
+          throw new Error('Failed to fetch student information.');
+        }
+
+        const student = await response.json();
+        currentStudent = student;
+
+        // Hide loading
+        loading.classList.remove('show');
+
+        // Display student information
+        document.getElementById('studentName').textContent = student.name || 'Unknown';
+        document.getElementById('studentEmail').textContent = student.email || '-';
+        document.getElementById('studentRFID').textContent = student.rfid || '-';
+        document.getElementById('studentSection').textContent = student.section || 'N/A';
+        document.getElementById('studentYear').textContent = student.year || 'N/A';
+        document.getElementById('studentPoints').textContent = student.points || 0;
+
+        // Show student info and action buttons
+        studentInfo.classList.add('show');
+        actionButtons.classList.add('show');
+
+      } catch (error) {
+        console.error('Error scanning RFID:', error);
+        loading.classList.remove('show');
+        errorMessage.textContent = error.message || 'An error occurred while scanning the card.';
+        errorMessage.classList.add('show');
+        
+        // Reset input after error
+        setTimeout(() => {
+          rfidInput.value = '';
+          rfidInput.focus();
+        }, 2000);
+      }
+    }
+
+    function usePoints() {
+      if (!currentStudent) {
+        alert('No student information available.');
+        return;
+      }
+
+      // Check if student has points
+      if (currentStudent.points <= 0) {
+        alert('You have no points available. Please recharge your points first.');
+        return;
+      }
+
+      // Redirect to login page with RFID parameter
+      window.location.href = `/login?rfid=${encodeURIComponent(currentStudent.rfid)}&action=usepoints`;
+    }
+
+    function cancelScan() {
+      // Reset the form
+      currentStudent = null;
+      rfidInput.value = '';
+      studentInfo.classList.remove('show');
+      actionButtons.classList.remove('show');
+      errorMessage.classList.remove('show');
+      rfidInput.focus();
+    }
+
+    // Keep focus on input field
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.btn') && !e.target.closest('a')) {
+        rfidInput.focus();
+      }
+    });
+
+    // Add event listeners to buttons
+    document.getElementById('usePointsBtn').addEventListener('click', usePoints);
+    document.getElementById('cancelBtn').addEventListener('click', cancelScan);
+  </script>
+</body>
+</html>

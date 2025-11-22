@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* ---------- Base ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  color: #064e3b;
+}
+
+/* ---------- Container ---------- */
+.container {
+  width: 100%;
+  max-width: 1400px;
+  background: #ffffffd9;
+  margin: 30px;
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  backdrop-filter: blur(8px);
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #d1fae5;
+ 
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #065f46;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  width: auto;
+  max-width: 15%;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.3s ease;
+  text-align: center;
+}
+
+.logout-btn:hover {
+  background: #b71c1c;
+  transform: scale(1.05);
+}
+
+/* ---------- Layout ---------- */
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: stretch;
+}
+
+/* ---------- Profile ---------- */
+.profile-card {
+  background: #f0fdf4;
+  padding: 20px ;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  flex: 1;
+  max-width: 25%;
+}
+
+.profile-card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 12px;
+}
+
+.profile-card p {
+  font-size: 0.95rem;
+  color: #047857;
+  margin-bottom: 6px;
+}
+
+.profile-card .contact-info p {
+  color: #064e3b;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.points-card {
+  flex: 3; /* 75% of container */
+}
+
+/* ---------- Dashboard ---------- */
+.points-card {
+  background: #fffde7;
+  padding: 20px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+}
+
+.points-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.points-details {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 15px;
+}
+
+.points-item {
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center;
+  background: #fef9c3;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  border: 1px solid #fde68a;
+}
+
+
+.points-item strong {
+  color: #065f46;
+}
+
+.points-item span {
+  color: #047857;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+.dashboard-layout {
+  display: flex;
+  gap: 20px;
+}
+
+/* ---------- Transaction History ---------- */
+.transaction-card {
+  background: #f8fafc;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 25px 30px;
+}
+
+.transaction-card h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #065f46;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transaction-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.transaction-card th,
+.transaction-card td {
+  text-align: left;
+  padding: 10px 8px;
+}
+
+.transaction-card th {
+  background: #10b981;
+  color: white;
+  font-weight: 600;
+}
+
+.transaction-card tr:nth-child(even) {
+  background: #ecfccb;
+}
+
+.transaction-card tr:hover {
+  background: #d9f99d;
+  transition: 0.2s;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .profile-card,
+  .points-card,
+  .transaction-card {
+    padding: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.6rem;
+  }
+
+  .points-item {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .profile-card h2,
+  .points-card h3,
+  .transaction-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .logout-btn {
+    width: 45px;              /* Make it a small round button */
+    height: 45px;
+    border-radius: 50%;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .logout-btn span {
+    display: none;            /* Hide the text label */
+  }
+}
+
+/* Charging Station Button */
+.charging-btn {
+  flex: 1;
+  min-width: 200px;
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.charging-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #047857, #059669);
+}
+
+.action-buttons-container {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* ---------- Statistics Grid ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* ---------- Transaction History ---------- */
+.transaction-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-card h3 {
+  color: #065f46;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.transaction-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transaction-card th {
+  background: #10b981;
+  color: white;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.transaction-card td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+}
+
+.transaction-card tbody tr:hover {
+  background: #f0fdf4;
+  transition: background 0.2s;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-completed {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-in-progress {
+  background: #fef3c7;
+  color: #d97706;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Student Dashboard</h1>
+  </div>
+
+  <!-- Profile and Dashboard -->
+  <div class="dashboard-layout">
+
+    <!-- Profile -->
+    <div class="profile-card">
+      <% if (student) { %>
+        <h2><%= student.name || 'No Name' %></h2>
+        <% if (student.section || student.year) { %>
+          <p><strong>Course:</strong> <%= student.section || 'N/A' %><%= student.year ? ' - Year ' + student.year : '' %></p>
+        <% } else { %>
+          <p><strong>Course:</strong> N/A</p>
+        <% } %>
+        <div class="contact-info">
+          <p><i class="fa-solid fa-envelope"></i> <%= student.email || 'N/A' %></p>
+          <p><i class="fa-solid fa-id-card"></i> RFID: <%= student.rfid || 'N/A' %></p>
+          <% if (student.contact) { %>
+            <p><i class="fa-solid fa-phone"></i> <%= student.contact %></p>
+          <% } %>
+        </div>
+      <% } else { %>
+        <h2>No student data found</h2>
+      <% } %>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="points-card">
+      <h3><i class="fa-solid fa-gauge-high"></i> Dashboard Overview</h3>
+      <div class="points-details">
+        <div class="points-item">
+          <strong>Current Points</strong>
+          <span id="currentPoints"><%= student && student.points != null ? student.points : 'N/A' %></span>
+        </div>
+        <div class="points-item">
+          <strong>Last Session</strong>
+          <span id="lastSession"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+        </div>
+        <div class="points-item">
+          <strong>Total Sessions</strong>
+          <span id="totalSessions"><i class="fas fa-spinner fa-spin"></i> Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Total Points Used</div>
+        <div class="stat-value" id="totalPointsUsed">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Completed Sessions</div>
+        <div class="stat-value" id="completedSessions">0</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-clock"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Total Time</div>
+        <div class="stat-value" id="totalDuration">0 min</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="stat-content">
+        <div class="stat-label">Avg. Points/Session</div>
+        <div class="stat-value" id="avgPoints">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction History -->
+  <div class="transaction-card">
+    <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Transaction History</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Date & Time</th>
+          <th>Socket Type</th>
+          <th>Duration</th>
+          <th>Points Used</th>
+          <th>Refunded</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="transactionTable">
+        <tr>
+          <td colspan="6" style="text-align: center; padding: 20px;">
+            <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons-container">
+    <button class="charging-btn" onclick="window.location.href='/charging-station'">
+      <i class="fas fa-charging-station"></i>
+      <span>Go to Charging Station</span>
+    </button>
+    <button class="charging-btn" onclick="window.location.href='/transaction-history'" style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);">
+      <i class="fas fa-history"></i>
+      <span>View History</span>
+    </button>
+    <button class="charging-btn" onclick="showAttendanceModal()" style="background: linear-gradient(135deg, #e4bf1dff 0%, #c09813ff 100%);">
+      <i class="fas fa-clipboard-check"></i>
+      <span>View Attendance Logs</span>
+    </button>
+    <button class="logout-btn" type="button" onclick="showLogoutModal()" style="flex: 1; min-width: 200px; margin-top: 0;">
+      <i class="fas fa-sign-out-alt"></i>
+      <span>Logout</span>
+    </button>
+  </div>
+
+<!-- Attendance Modal -->
+<div id="attendanceModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999; overflow-y:auto; padding:20px;">
+  <div style="background:#fff; padding:25px; border-radius:12px; max-width:900px; width:100%; max-height:90vh; overflow-y:auto; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #d1fae5; padding-bottom:10px;">
+      <h3 style="margin:0; color:#065f46; font-size:1.5rem;">📋 Attendance Logs</h3>
+      <button onclick="hideAttendanceModal()" style="background:#e5e7eb; border:none; border-radius:50%; width:32px; height:32px; cursor:pointer; font-size:18px; color:#374151;">×</button>
+    </div>
+    
+    <!-- Filters -->
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <div style="flex:1; min-width:200px;">
+        <label style="display:block; margin-bottom:5px; font-weight:600; color:#374151; font-size:0.9rem;">Section</label>
+        <select id="sectionFilter" onchange="filterAttendance()" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem;">
+          <option value="">All Sections</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:200px;">
+        <label style="display:block; margin-bottom:5px; font-weight:600; color:#374151; font-size:0.9rem;">Year</label>
+        <select id="yearFilter" onchange="filterAttendance()" style="width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; font-size:0.95rem;">
+          <option value="">All Years</option>
+          <option value="1">Year 1</option>
+          <option value="2">Year 2</option>
+          <option value="3">Year 3</option>
+          <option value="4">Year 4</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:200px; display:flex; align-items:flex-end;">
+        <button onclick="loadAttendanceLogs()" style="width:100%; padding:10px; background:#10b981; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+        <thead>
+          <tr>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Student Name</th>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Section</th>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Year</th>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Date</th>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Time</th>
+            <th style="background:#10b981; color:white; padding:12px; text-align:left; font-weight:600;">Points</th>
+          </tr>
+        </thead>
+        <tbody id="attendanceTableBody">
+          <tr>
+            <td colspan="6" style="text-align:center; padding:20px; color:#6b7280;">
+              <i class="fas fa-spinner fa-spin"></i> Loading attendance logs...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+      <button onclick="hideAttendanceModal()" style="padding:10px 20px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div id="logoutModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+  <div style="background:#fff; padding:20px; border-radius:12px; width:320px; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+    <h3 style="margin-bottom:12px; color:#111827;">Confirm Logout</h3>
+    <p style="margin-bottom:18px; color:#6b7280;">Are you sure you want to log out?</p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button onclick="confirmLogout()" style="padding:10px 16px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:600;">Logout</button>
+      <button onclick="hideLogoutModal()" style="padding:10px 16px; background:#e5e7eb; color:#111827; border:none; border-radius:8px; font-weight:600;">Cancel</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// Load real data from Firebase
+async function loadDashboardData() {
+  try {
+    // Fetch transaction history and stats
+    const response = await fetch('/api/transactions/history');
+    const data = await response.json();
+
+    if (data.success) {
+      // Update statistics
+      updateStatistics(data.stats);
+      
+      // Update dashboard overview
+      updateDashboardOverview(data.transactions);
+      
+      // Update transaction table
+      updateTransactionTable(data.transactions);
+    } else {
+      console.error('Failed to load dashboard data:', data.error);
+      showNoDataMessage();
+    }
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    showNoDataMessage();
+  }
+}
+
+function updateStatistics(stats) {
+  document.getElementById('totalPointsUsed').textContent = stats.totalPointsUsed || 0;
+  document.getElementById('completedSessions').textContent = stats.completedSessions || 0;
+  document.getElementById('totalSessions').textContent = stats.totalSessions || 0;
+  
+  // Convert total duration to hours and minutes
+  const totalMinutes = Math.floor((stats.totalDuration || 0) / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  document.getElementById('totalDuration').textContent = durationText;
+  
+  document.getElementById('avgPoints').textContent = stats.averagePointsPerSession || 0;
+}
+
+function updateDashboardOverview(transactions) {
+  const lastSessionEl = document.getElementById('lastSession');
+  
+  if (transactions && transactions.length > 0) {
+    // Get the most recent transaction
+    const lastTransaction = transactions[0];
+    const date = new Date(lastTransaction.startTime.seconds * 1000);
+    const formattedDate = date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+    lastSessionEl.textContent = formattedDate;
+  } else {
+    lastSessionEl.textContent = 'N/A';
+  }
+}
+
+function updateTransactionTable(transactions) {
+  const tbody = document.getElementById('transactionTable');
+  
+  if (!transactions || transactions.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align: center; padding: 20px; color: #6b7280;">
+          <i class="fas fa-inbox"></i><br>
+          No transactions yet. Start your first charging session!
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  // Show only the 5 most recent transactions
+  const recentTransactions = transactions.slice(0, 5);
+  
+  tbody.innerHTML = recentTransactions.map(txn => {
+    const startDate = new Date(txn.startTime.seconds * 1000);
+    const dateTime = startDate.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    // Format duration
+    let durationText = 'N/A';
+    if (txn.duration) {
+      const totalMinutes = Math.floor(txn.duration / 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    }
+    
+    // Calculate refunded points for cancelled transactions
+    let refundedDisplay = '-';
+    if (txn.status === 'cancelled' && txn.pointsRefunded) {
+      refundedDisplay = `<span style="color: #059669; font-weight: 600;">+${txn.pointsRefunded}</span>`;
+    } else if (txn.status === 'cancelled' && txn.pointsRefunded === 0) {
+      refundedDisplay = '0';
+    }
+    
+    // Status badge
+    const statusClass = `status-${txn.status.replace(' ', '-')}`;
+    const statusText = txn.status.charAt(0).toUpperCase() + txn.status.slice(1);
+    
+    return `
+      <tr>
+        <td>${dateTime}</td>
+        <td><i class="fas fa-plug"></i> ${txn.socketType}</td>
+        <td>${durationText}</td>
+        <td>${txn.pointsUsed} pts</td>
+        <td>${refundedDisplay}</td>
+        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showNoDataMessage() {
+  document.getElementById('lastSession').textContent = 'N/A';
+  document.getElementById('totalSessions').textContent = '0';
+  
+  const tbody = document.getElementById('transactionTable');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" style="text-align: center; padding: 20px; color: #dc2626;">
+        <i class="fas fa-exclamation-circle"></i><br>
+        Error loading transaction data
+      </td>
+    </tr>
+  `;
+}
+
+// Load data when page loads
+window.addEventListener('DOMContentLoaded', loadDashboardData);
+
+// Refresh data every 30 seconds
+setInterval(loadDashboardData, 30000);
+
+// Attendance Modal Functions
+let allAttendanceLogs = [];
+
+function showAttendanceModal() {
+  document.getElementById('attendanceModal').style.display = 'flex';
+  loadAttendanceLogs();
+  populateSectionFilter();
+}
+
+function hideAttendanceModal() {
+  document.getElementById('attendanceModal').style.display = 'none';
+}
+
+async function loadAttendanceLogs() {
+  try {
+    const section = document.getElementById('sectionFilter').value;
+    const year = document.getElementById('yearFilter').value;
+    
+    let url = '/api/attendance/by-section?';
+    if (section) url += `section=${encodeURIComponent(section)}&`;
+    if (year) url += `year=${encodeURIComponent(year)}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.success && data.attendance) {
+      allAttendanceLogs = data.attendance;
+      displayAttendanceLogs(data.attendance);
+    } else {
+      showNoAttendanceData();
+    }
+  } catch (error) {
+    console.error('Error loading attendance logs:', error);
+    showNoAttendanceData();
+  }
+}
+
+function displayAttendanceLogs(logs) {
+  const tbody = document.getElementById('attendanceTableBody');
+  
+  if (!logs || logs.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center; padding:20px; color:#6b7280;">
+          <i class="fas fa-inbox"></i><br>
+          No attendance records found
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = logs.map(record => {
+    const timestamp = new Date(record.timestamp.seconds * 1000);
+    const date = timestamp.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    const time = timestamp.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+
+    return `
+      <tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:12px;">${record.studentName || 'N/A'}</td>
+        <td style="padding:12px;">${record.section || 'N/A'}</td>
+        <td style="padding:12px;">${record.year ? 'Year ' + record.year : 'N/A'}</td>
+        <td style="padding:12px;">${date}</td>
+        <td style="padding:12px;">${time}</td>
+        <td style="padding:12px; color:#059669; font-weight:600;">+${record.pointsAdded || 0} pts</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function showNoAttendanceData() {
+  const tbody = document.getElementById('attendanceTableBody');
+  tbody.innerHTML = `
+    <tr>
+      <td colspan="6" style="text-align:center; padding:20px; color:#dc2626;">
+        <i class="fas fa-exclamation-circle"></i><br>
+        Error loading attendance data
+      </td>
+    </tr>
+  `;
+}
+
+async function populateSectionFilter() {
+  try {
+    // Get all attendance logs to extract unique sections
+    const response = await fetch('/api/attendance/by-section');
+    const data = await response.json();
+
+    if (data.success && data.attendance) {
+      const sections = [...new Set(data.attendance.map(record => record.section).filter(s => s))];
+      const sectionFilter = document.getElementById('sectionFilter');
+      
+      // Clear existing options except "All Sections"
+      sectionFilter.innerHTML = '<option value="">All Sections</option>';
+      
+      // Add unique sections
+      sections.sort().forEach(section => {
+        const option = document.createElement('option');
+        option.value = section;
+        option.textContent = section;
+        sectionFilter.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error populating section filter:', error);
+  }
+}
+
+function filterAttendance() {
+  loadAttendanceLogs();
+}
+</script>
+<script>
+  function showLogoutModal() {
+    document.getElementById('logoutModal').style.display = 'flex';
+  }
+  function hideLogoutModal() {
+    document.getElementById('logoutModal').style.display = 'none';
+  }
+  function confirmLogout() {
+    window.location.href = '/logout';
+  }
+
+  // Prevent browser back button from going to unauthorized pages
+  (function() {
+    // Push current state to history to prevent back navigation
+    if (window.history && window.history.pushState) {
+      window.history.pushState('forward', null, window.location.href);
+      
+      // Listen for back button
+      window.addEventListener('popstate', function(event) {
+        // Check if user is still authenticated
+        fetch('/api/session')
+          .then(res => res.json())
+          .then(data => {
+            if (data.authenticated) {
+              // User is still logged in, stay on this page
+              window.history.pushState('forward', null, window.location.href);
+            } else {
+              // User is not authenticated, allow navigation
+              window.location.href = '/login';
+            }
+          })
+          .catch(() => {
+            // On error, stay on current page to be safe
+            window.history.pushState('forward', null, window.location.href);
+          });
+      });
+    }
+  })();
+</script>
+</body>
+</html>
