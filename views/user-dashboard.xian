@@ -28,10 +28,10 @@ body {
 /* ---------- Container ---------- */
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   background: #ffffffd9;
-  margin: 30px 20px;
-  padding: 30px 40px;
+  margin: 30px;
+  padding: 50px;
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -46,7 +46,7 @@ body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 2px solid #d1fae5;
-  padding-bottom: 10px;
+ 
 }
 
 .header h1 {
@@ -80,16 +80,18 @@ body {
 .dashboard-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 100px;
   align-items: stretch;
 }
 
 /* ---------- Profile ---------- */
 .profile-card {
   background: #f0fdf4;
-  padding: 25px 30px;
+  padding: 20px ;
   border: 1px solid #bbf7d0;
   border-radius: 10px;
+  flex: 1;
+  max-width: 25%;
 }
 
 .profile-card h2 {
@@ -112,11 +114,14 @@ body {
   align-items: center;
   gap: 8px;
 }
+.points-card {
+  flex: 3; /* 75% of container */
+}
 
 /* ---------- Dashboard ---------- */
 .points-card {
   background: #fffde7;
-  padding: 25px 30px;
+  padding: 20px;
   border: 1px solid #fde68a;
   border-radius: 10px;
 }
@@ -132,21 +137,23 @@ body {
 }
 
 .points-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 15px;
 }
 
 .points-item {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; 
   align-items: center;
+  justify-content: center;
   background: #fef9c3;
-  padding: 10px 14px;
+  padding: 20px;
   border-radius: 8px;
   font-size: 0.95rem;
   border: 1px solid #fde68a;
 }
+
 
 .points-item strong {
   color: #065f46;
@@ -155,6 +162,12 @@ body {
 .points-item span {
   color: #047857;
   font-weight: 600;
+  margin-top: 5px;
+}
+
+.dashboard-layout {
+  display: flex;
+  gap: 20px;
 }
 
 /* ---------- Transaction History ---------- */
@@ -523,7 +536,7 @@ body {
       <i class="fas fa-history"></i>
       <span>View History</span>
     </button>
-    <button class="charging-btn" onclick="showAttendanceModal()" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+    <button class="charging-btn" onclick="showAttendanceModal()" style="background: linear-gradient(135deg, #e4bf1dff 0%, #c09813ff 100%);">
       <i class="fas fa-clipboard-check"></i>
       <span>View Attendance Logs</span>
     </button>

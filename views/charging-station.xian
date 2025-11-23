@@ -8,7 +8,6 @@
     body {
       background: linear-gradient(135deg, #10b981 0%, #facc15 50%, #059669 100%);
       min-height: 100vh;
-      padding: 30px 15px;
       font-family: "Segoe UI", sans-serif;
       display: flex;
       align-items: center;
@@ -27,6 +26,7 @@
       flex-direction: column;
       position: relative;
       gap: 10px;
+      margin: 20px auto;
     }
 
     /* Header Controls */
@@ -265,6 +265,7 @@
       background: #dc2626;
     }
 
+
     /* Table */
     .log-table {
       width: 100%;
@@ -312,6 +313,22 @@
     .log-table tbody tr:last-child td {
       border-bottom: none;
     }
+
+   .table-body-wrapper {
+  max-height: 130px; 
+  overflow-y: auto;
+}
+
+/* Optional: scrollbar styling */
+.table-body-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+.table-body-wrapper::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
+
 
     /* Logout Button */
     .logout-btn {
@@ -388,7 +405,7 @@
       <div class="input-row">
         <div class="input-group">
           <label for="studentId">Student RFID</label>
-          <input type="text" id="studentId" placeholder="Enter RFID" value="" />
+          <input type="text" id="studentId" placeholder="Enter RFID" value="" readonly />
         </div>
 
         <div class="input-group">
@@ -417,17 +434,22 @@
       <button class="stop-btn" id="stopChargingBtn">⏹️ STOP CHARGING</button>
     </div>
 
-    <table class="log-table" id="usageLogTable">
-      <thead>
-        <tr>
-          <th>Student</th>
-          <th>Points Used</th>
-          <th>Socket</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+ <table class="log-table">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Points Used</th>
+      <th>Socket</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+</table>
+<div class="table-body-wrapper">
+  <table class="log-table" id="usageLogTable">
+    <tbody></tbody>
+  </table>
+</div>
+
 
     <button class="logout-btn" id="logoutBtn"><span>Logout</span></button>
   </div>
@@ -444,343 +466,328 @@
     </div>
   </div>
 
-  <script>
-    let selectedSocket = 1;
-    let chargingInterval = null;
-    let remainingSeconds = 0;
-    let currentTransactionId = null;
-    let currentStudentRFID = null;
+<script>
+let selectedSocket = 1;
+let chargingInterval = null;
+let remainingSeconds = 0;
+let currentTransactionId = null;
+let currentStudentRFID = null;
 
-    // Load student data and check for active session on page load
-    async function loadStudentData() {
-      try {
-        const response = await fetch('/api/me');
-        const data = await response.json();
-        
-        if (data.error) {
-          // User not authenticated, redirect to login
-          window.location.href = '/login';
-          return;
-        }
+// --- Notification Function ---
+function showNotification(message, type = "success") {
+  let notification = document.getElementById("notification");
+  if (!notification) {
+    notification = document.createElement("div");
+    notification.id = "notification";
+    notification.style.position = "fixed";
+    notification.style.top = "20px";
+    notification.style.right = "20px";
+    notification.style.minWidth = "250px";
+    notification.style.padding = "12px 16px";
+    notification.style.borderRadius = "8px";
+    notification.style.color = "white";
+    notification.style.fontWeight = "600";
+    notification.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+    notification.style.display = "none";
+    notification.style.zIndex = "9999";
+    document.body.appendChild(notification);
+  }
 
-        if (data.rfid) {
-          currentStudentRFID = data.rfid;
-          // Only set the studentId if the field is empty to avoid clearing user input
-          const studentIdInput = document.getElementById("studentId");
-          if (!studentIdInput.value) {
-            studentIdInput.value = data.rfid;
-          }
-          document.getElementById("displayStudentId").textContent = data.rfid;
-          document.getElementById("displayName").textContent = data.name || 'N/A';
-          document.getElementById("displayPoints").textContent = data.points || 0;
-          document.getElementById("displayLastUsed").textContent = 
-            data.lastUsed ? new Date(data.lastUsed.seconds * 1000).toLocaleDateString() : 'Never';
-          document.getElementById("pointsToSpend").max = data.points || 0;
-        }
+  notification.textContent = message;
 
-        // Check for active session
-        const activeResponse = await fetch(`/api/transactions/active/${data.rfid}`);
-        const activeData = await activeResponse.json();
-        
-        if (activeData.success && activeData.activeTransaction) {
-          resumeActiveSession(activeData.activeTransaction);
-        }
-      } catch (error) {
-        console.error('Error loading student data:', error);
-        // If there's an error, likely not authenticated
-        window.location.href = '/login';
-      }
-    }
+  if (type === "success") {
+    notification.style.background = "#10b981"; // green
+  } else if (type === "error") {
+    notification.style.background = "#ef4444"; // red
+  } else {
+    notification.style.background = "#6b7280"; // gray
+  }
 
-    // Resume an active charging session
-    function resumeActiveSession(transaction) {
-      currentTransactionId = transaction.id;
-      selectedSocket = transaction.socketNumber || 1;
-      
-      // Calculate remaining time correctly
-      const startTime = transaction.startTime.seconds * 1000;
-      const expectedDuration = transaction.pointsUsed * 120; // seconds
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      remainingSeconds = Math.max(0, expectedDuration - elapsed);
+  notification.style.display = "block";
+  notification.style.opacity = "1";
 
-      console.log('Resuming session:', {
-        transactionId: transaction.id,
-        startTime: new Date(startTime),
-        expectedDuration,
-        elapsed,
-        remainingSeconds
-      });
+  setTimeout(() => {
+    notification.style.transition = "opacity 0.5s";
+    notification.style.opacity = "0";
+    setTimeout(() => {
+      notification.style.display = "none";
+      notification.style.transition = "";
+    }, 500);
+  }, 3000);
+}
 
-      if (remainingSeconds > 0) {
-        // Update socket selection display
-        document.querySelectorAll(".socket-btn").forEach((btn, index) => {
-          btn.classList.toggle("active", index + 1 === selectedSocket);
-        });
-        
-        document.getElementById("controlPanel").style.display = "none";
-        document.getElementById("timerDisplay").classList.add("active");
-        updateTimer();
-        startCountdown();
-      } else {
-        // Session should have ended, complete it
-        console.log('Session expired, completing automatically');
-        stopCharging(true);
-      }
-    }
-
-    function selectSocket(socketNumber) {
-      selectedSocket = socketNumber;
-      document.querySelectorAll(".socket-btn").forEach((btn, index) => {
-        btn.classList.toggle("active", index + 1 === socketNumber);
-      });
-    }
-
-    async function startCharging() {
-      const studentId = document.getElementById("studentId").value;
-      const pointsToSpend = parseInt(document.getElementById("pointsToSpend").value);
-
-      if (!studentId || !pointsToSpend || pointsToSpend <= 0) {
-        alert("Please enter valid details!");
-        return;
-      }
-
-      const currentPoints = parseInt(document.getElementById("displayPoints").textContent);
-      if (pointsToSpend > currentPoints) {
-        alert("Insufficient points!");
-        return;
-      }
-
-      // Determine socket type
-      const socketType = selectedSocket === 1 ? "Universal Charger" : "Own Charger";
-
-      try {
-        // Start charging session via API
-        const response = await fetch('/api/transactions/start', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            rfid: studentId,
-            pointsToSpend: pointsToSpend,
-            socketType: socketType,
-            socketNumber: selectedSocket
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          currentTransactionId = data.transactionId;
-          
-          // Update UI
-          document.getElementById("displayPoints").textContent = data.remainingPoints;
-          document.getElementById("controlPanel").style.display = "none";
-          document.getElementById("timerDisplay").classList.add("active");
-
-          // Start timer
-          remainingSeconds = data.expectedDuration;
-          updateTimer();
-          startCountdown();
-
-          // Add to usage log
-          addToUsageLog(studentId, pointsToSpend, socketType);
-        } else {
-          alert(data.error || "Failed to start charging session");
-        }
-      } catch (error) {
-        console.error('Error starting charging:', error);
-        alert("Error starting charging session. Please try again.");
-      }
-    }
-
-    function startCountdown() {
-      chargingInterval = setInterval(() => {
-        remainingSeconds--;
-        updateTimer();
-        if (remainingSeconds <= 0) {
-          stopCharging(true);
-          alert("Charging completed!");
-        }
-      }, 1000);
-    }
-
-    function updateTimer() {
-      const min = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
-      const sec = String(remainingSeconds % 60).padStart(2, "0");
-      document.getElementById("timerValue").textContent = `${min}:${sec}`;
-    }
-
-    async function stopCharging(completed = false) {
-      clearInterval(chargingInterval);
-      chargingInterval = null;
-
-      if (!currentTransactionId) {
-        document.getElementById("controlPanel").style.display = "block";
-        document.getElementById("timerDisplay").classList.remove("active");
-        return;
-      }
-
-      try {
-        // Stop charging session via API
-        const response = await fetch('/api/transactions/stop', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            transactionId: currentTransactionId,
-            status: completed ? "completed" : "cancelled"
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Update remaining points display
-          document.getElementById("displayPoints").textContent = data.remainingPoints;
-          
-          // Reload transaction table to show the new completed transaction
-          loadRecentTransactions();
-          
-          if (!completed) {
-            alert(`Charging ${data.transaction.status}! ${data.transaction.pointsRefunded ? 'Points refunded: ' + data.transaction.pointsRefunded : ''}`);
-          }
-        }
-      } catch (error) {
-        console.error('Error stopping charging:', error);
-      } finally {
-        currentTransactionId = null;
-        document.getElementById("controlPanel").style.display = "block";
-        document.getElementById("timerDisplay").classList.remove("active");
-      }
-    }
-
-    function addToUsageLog(studentId, points, socket) {
-      const table = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
-      const row = table.insertRow(0);
-      const now = new Date().toLocaleTimeString();
-      
-      row.innerHTML = `
-        <td>${studentId}</td>
-        <td>${points}</td>
-        <td>${socket}</td>
-        <td>${now}</td>
-      `;
-      
-      // Keep only last 10 rows
-      while (table.rows.length > 10) {
-        table.deleteRow(table.rows.length - 1);
-      }
-    }
-
-    // Load recent transactions into the usage log
-    async function loadRecentTransactions() {
-      try {
-        const response = await fetch('/api/transactions/history');
-        const data = await response.json();
-        
-        if (data.success && data.transactions && data.transactions.length > 0) {
-          const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
-          tbody.innerHTML = ''; // Clear existing rows
-          
-          // Show last 10 transactions
-          const recentTransactions = data.transactions.slice(0, 10);
-          
-          recentTransactions.forEach(txn => {
-            const row = tbody.insertRow();
-            const date = new Date(txn.startTime.seconds * 1000);
-            const time = date.toLocaleTimeString('en-US', { 
-              hour: 'numeric', 
-              minute: '2-digit',
-              hour12: true 
-            });
-            
-            row.innerHTML = `
-              <td>${txn.studentName || txn.rfid}</td>
-              <td>${txn.pointsUsed}</td>
-              <td>${txn.socketType}</td>
-              <td>${time}</td>
-            `;
-          });
-        } else {
-          // Show empty state
-          const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
-          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No recent transactions</td></tr>';
-        }
-      } catch (error) {
-        console.error('Error loading recent transactions:', error);
-      }
-    }
-
-    // Logout Modal Functions
-    function showLogoutModal() {
-      document.getElementById('logoutModal').style.display = 'flex';
-    }
+// --- Load Student Data ---
+async function loadStudentData() {
+  try {
+    const response = await fetch('/api/me');
+    const data = await response.json();
     
-    function hideLogoutModal() {
-      document.getElementById('logoutModal').style.display = 'none';
-    }
-    
-    function confirmLogout() {
-      window.location.href = '/logout';
+    if (data.error) {
+      window.location.href = '/login';
+      return;
     }
 
-    // Load student data and transactions on page load
-    window.addEventListener('DOMContentLoaded', () => {
-      loadStudentData();
-      loadRecentTransactions();
-      
-      // Set up event listeners
-      document.getElementById('backBtn').addEventListener('click', () => {
-        window.location.href = '/user-dashboard';
-      });
-      
-      document.getElementById('startChargingBtn').addEventListener('click', startCharging);
-      document.getElementById('stopChargingBtn').addEventListener('click', () => stopCharging(false));
-      document.getElementById('logoutBtn').addEventListener('click', showLogoutModal);
-      document.getElementById('confirmLogoutBtn').addEventListener('click', confirmLogout);
-      document.getElementById('cancelLogoutBtn').addEventListener('click', hideLogoutModal);
-      
-      // Socket selection
-      document.querySelectorAll('.socket-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const socketNum = parseInt(btn.getAttribute('data-socket'));
-          selectSocket(socketNum);
-        });
-      });
+    if (data.rfid) {
+      currentStudentRFID = data.rfid;
+      document.getElementById("studentId").value = data.rfid;
+      document.getElementById("displayStudentId").textContent = data.rfid;
+      document.getElementById("displayName").textContent = data.name || 'N/A';
+      document.getElementById("displayPoints").textContent = data.points || 0;
+      document.getElementById("displayLastUsed").textContent = 
+        data.lastUsed ? new Date(data.lastUsed.seconds * 1000).toLocaleDateString() : 'Never';
+      document.getElementById("pointsToSpend").max = data.points || 0;
+    }
+
+    const activeResponse = await fetch(`/api/transactions/active/${data.rfid}`);
+    const activeData = await activeResponse.json();
+    
+    if (activeData.success && activeData.activeTransaction) {
+      resumeActiveSession(activeData.activeTransaction);
+    }
+  } catch (error) {
+    console.error('Error loading student data:', error);
+    window.location.href = '/login';
+  }
+}
+
+// --- Resume Active Session ---
+function resumeActiveSession(transaction) {
+  currentTransactionId = transaction.id;
+  selectedSocket = transaction.socketNumber || 1;
+
+  const startTime = transaction.startTime.seconds * 1000;
+  const expectedDuration = transaction.pointsUsed * 120;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  remainingSeconds = Math.max(0, expectedDuration - elapsed);
+
+  if (remainingSeconds > 0) {
+    document.querySelectorAll(".socket-btn").forEach((btn, index) => {
+      btn.classList.toggle("active", index + 1 === selectedSocket);
     });
 
-    // Refresh transactions every 30 seconds
-    setInterval(loadRecentTransactions, 30000);
+    document.getElementById("controlPanel").style.display = "none";
+    document.getElementById("timerDisplay").classList.add("active");
+    updateTimer();
+    startCountdown();
+  } else {
+    stopCharging(true);
+  }
+}
 
-    // Prevent browser back button from going to unauthorized pages
-    (function() {
-      // Push current state to history to prevent back navigation
-      if (window.history && window.history.pushState) {
-        window.history.pushState('forward', null, window.location.href);
-        
-        // Listen for back button
-        window.addEventListener('popstate', function(event) {
-          // Check if user is still authenticated
-          fetch('/api/session')
-            .then(res => res.json())
-            .then(data => {
-              if (data.authenticated) {
-                // User is still logged in, stay on this page
-                window.history.pushState('forward', null, window.location.href);
-              } else {
-                // User is not authenticated, allow navigation
-                window.location.href = '/login';
-              }
-            })
-            .catch(() => {
-              // On error, stay on current page to be safe
-              window.history.pushState('forward', null, window.location.href);
-            });
-        });
+// --- Select Socket ---
+function selectSocket(socketNumber) {
+  selectedSocket = socketNumber;
+  document.querySelectorAll(".socket-btn").forEach((btn, index) => {
+    btn.classList.toggle("active", index + 1 === socketNumber);
+  });
+}
+
+// --- Start Charging ---
+async function startCharging() {
+  const studentId = document.getElementById("studentId").value;
+  const pointsToSpend = parseInt(document.getElementById("pointsToSpend").value);
+
+  if (!studentId || !pointsToSpend || pointsToSpend <= 0) {
+    showNotification("⚠️ Please enter valid details!", "error");
+    return;
+  }
+
+  const currentPoints = parseInt(document.getElementById("displayPoints").textContent);
+  if (pointsToSpend > currentPoints) {
+    showNotification("❌ Insufficient points!", "error");
+    return;
+  }
+
+  const socketType = selectedSocket === 1 ? "Universal Charger" : "Own Charger";
+
+  try {
+    const response = await fetch('/api/transactions/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rfid: studentId,
+        pointsToSpend: pointsToSpend,
+        socketType: socketType,
+        socketNumber: selectedSocket
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      currentTransactionId = data.transactionId;
+      document.getElementById("displayPoints").textContent = data.remainingPoints;
+      document.getElementById("controlPanel").style.display = "none";
+      document.getElementById("timerDisplay").classList.add("active");
+
+      remainingSeconds = data.expectedDuration;
+      updateTimer();
+      startCountdown();
+
+      addToUsageLog(studentId, pointsToSpend, socketType);
+      showNotification("✅ Charging started!", "success");
+    } else {
+      showNotification(data.error || "Failed to start charging session", "error");
+    }
+  } catch (error) {
+    console.error('Error starting charging:', error);
+    showNotification("Error starting charging session. Please try again.", "error");
+  }
+}
+
+// --- Countdown Timer ---
+function startCountdown() {
+  chargingInterval = setInterval(() => {
+    remainingSeconds--;
+    updateTimer();
+    if (remainingSeconds <= 0) {
+      stopCharging(true);
+      showNotification("✅ Charging completed!", "success");
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const min = String(Math.floor(remainingSeconds / 60)).padStart(2, "0");
+  const sec = String(remainingSeconds % 60).padStart(2, "0");
+  document.getElementById("timerValue").textContent = `${min}:${sec}`;
+}
+
+// --- Stop Charging ---
+async function stopCharging(completed = false) {
+  clearInterval(chargingInterval);
+  chargingInterval = null;
+
+  if (!currentTransactionId) {
+    document.getElementById("controlPanel").style.display = "block";
+    document.getElementById("timerDisplay").classList.remove("active");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/transactions/stop', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        transactionId: currentTransactionId,
+        status: completed ? "completed" : "cancelled"
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      document.getElementById("displayPoints").textContent = data.remainingPoints;
+      loadRecentTransactions();
+
+      if (!completed) {
+        showNotification(`Charging ${data.transaction.status}! ${data.transaction.pointsRefunded ? 'Points refunded: ' + data.transaction.pointsRefunded : ''}`, "success");
       }
-    })();
-  </script>
+    }
+  } catch (error) {
+    console.error('Error stopping charging:', error);
+    showNotification("Error stopping charging session.", "error");
+  } finally {
+    currentTransactionId = null;
+    document.getElementById("controlPanel").style.display = "block";
+    document.getElementById("timerDisplay").classList.remove("active");
+  }
+}
+
+// --- Usage Log ---
+function addToUsageLog(studentId, points, socket) {
+  const table = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+  const row = table.insertRow(0);
+  const now = new Date().toLocaleTimeString();
+
+  row.innerHTML = `
+    <td>${studentId}</td>
+    <td>${points}</td>
+    <td>${socket}</td>
+    <td>${now}</td>
+  `;
+
+  while (table.rows.length > 10) {
+    table.deleteRow(table.rows.length - 1);
+  }
+}
+
+// --- Load Recent Transactions ---
+async function loadRecentTransactions() {
+  try {
+    const response = await fetch('/api/transactions/history');
+    const data = await response.json();
+
+    const tbody = document.getElementById("usageLogTable").getElementsByTagName("tbody")[0];
+    if (data.success && data.transactions && data.transactions.length > 0) {
+      tbody.innerHTML = '';
+      const recentTransactions = data.transactions.slice(0, 10);
+      recentTransactions.forEach(txn => {
+        const row = tbody.insertRow();
+        const date = new Date(txn.startTime.seconds * 1000);
+        const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        row.innerHTML = `
+          <td>${txn.studentName || txn.rfid}</td>
+          <td>${txn.pointsUsed}</td>
+          <td>${txn.socketType}</td>
+          <td>${time}</td>
+        `;
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px; color:#6b7280;">No recent transactions</td></tr>';
+    }
+  } catch (error) {
+    console.error('Error loading recent transactions:', error);
+  }
+}
+
+// --- Logout Modal ---
+function showLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'flex';
+}
+function hideLogoutModal() {
+  document.getElementById('logoutModal').style.display = 'none';
+}
+function confirmLogout() {
+  window.location.href = '/logout';
+}
+
+// --- Initialize ---
+window.addEventListener('DOMContentLoaded', () => {
+  loadStudentData();
+  loadRecentTransactions();
+
+  document.getElementById('backBtn').addEventListener('click', () => window.location.href = '/user-dashboard');
+  document.getElementById('startChargingBtn').addEventListener('click', startCharging);
+  document.getElementById('stopChargingBtn').addEventListener('click', () => stopCharging(false));
+  document.getElementById('logoutBtn').addEventListener('click', showLogoutModal);
+  document.getElementById('confirmLogoutBtn').addEventListener('click', confirmLogout);
+  document.getElementById('cancelLogoutBtn').addEventListener('click', hideLogoutModal);
+
+  document.querySelectorAll('.socket-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectSocket(parseInt(btn.getAttribute('data-socket'))));
+  });
+});
+
+// --- Refresh transactions every 30 seconds ---
+setInterval(loadRecentTransactions, 30000);
+
+// --- Prevent back button from unauthorized pages ---
+(function() {
+  if (window.history && window.history.pushState) {
+    window.history.pushState('forward', null, window.location.href);
+    window.addEventListener('popstate', function() {
+      fetch('/api/session')
+        .then(res => res.json())
+        .then(data => {
+          if (data.authenticated) window.history.pushState('forward', null, window.location.href);
+          else window.location.href = '/login';
+        })
+        .catch(() => window.history.pushState('forward', null, window.location.href));
+    });
+  }
+})();
+</script>
+
 </body>
 </html>

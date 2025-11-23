@@ -31,7 +31,7 @@
       border-radius: 20px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       padding: 50px;
-      max-width: 600px;
+      max-width: 800px;
       width: 100%;
       text-align: center;
     }
@@ -163,9 +163,10 @@
 
     .info-row {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       padding: 12px 0;
       border-bottom: 1px solid #a7f3d0;
+       gap: 5px;
     }
 
     .info-row:last-child {
@@ -176,12 +177,16 @@
       color: #059669;
       font-weight: 600;
       font-size: 14px;
+      width: 100px;
     }
 
     .info-value {
+      text-align: left;
       color: #374151;
       font-weight: 500;
       font-size: 14px;
+      margin-left: 10px;
+      flex: 1;
     }
 
     .points-display {
@@ -327,6 +332,33 @@
       color: #10b981;
     }
 
+.info-columns {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.info-left {
+  flex: 2;
+}
+
+.info-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .info-columns {
+    flex-direction: column;
+  }
+  .info-right {
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
+}
+
     @media (max-width: 640px) {
       .container {
         padding: 30px 20px;
@@ -351,7 +383,7 @@
     <div class="logo">
       <i class="fas fa-clipboard-check"></i>
     </div>
-    <h1>📋 Attendance Scanner</h1>
+    <h1>Attendance Scanner</h1>
     <p class="subtitle">Earn 10 Points Daily - Tap Once Per Day</p>
 
     <div class="scan-section">
@@ -382,15 +414,17 @@
     <div class="error-message" id="errorMessage"></div>
     <div class="success-message" id="successMessage"></div>
 
-    <div class="student-info" id="studentInfo">
-      <div class="info-header">
-        <i class="fas fa-user-check"></i>
-        <div class="info-header-text">
-          <h2 id="studentName">Loading...</h2>
-          <p id="scanStatus">Scan Successful</p>
-        </div>
-      </div>
+ <div class="student-info" id="studentInfo">
+  <div class="info-header">
+    <i class="fas fa-user-check"></i>
+    <div class="info-header-text">
+      <h2 id="studentName">Loading...</h2>
+      <p id="scanStatus">Scan Successful</p>
+    </div>
+  </div>
 
+  <div class="info-columns ">
+    <div class="info-left">
       <div class="info-row">
         <span class="info-label">Email:</span>
         <span class="info-value" id="studentEmail">-</span>
@@ -407,7 +441,9 @@
         <span class="info-label">Year:</span>
         <span class="info-value" id="studentYear">-</span>
       </div>
+    </div>
 
+    <div class="info-right">
       <div class="points-display">
         <div class="points-label">Total Points</div>
         <div class="points-value">
@@ -416,6 +452,9 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
 
     <div class="action-buttons" id="actionButtons">
       <button class="btn btn-secondary" id="cancelBtn">
@@ -458,13 +497,12 @@
       }
 
       // Set new timeout - RFID readers typically input data quickly
-      // Increased to 1000ms to allow manual typing without auto-triggering
       scanTimeout = setTimeout(() => {
         const rfid = rfidInput.value.trim();
         if (rfid.length > 0) {
           scanRFID(rfid);
         }
-      }, 1000); // Wait 1000ms after last character
+      }, 500); // Wait 500ms after last character
     });
 
     // Also trigger on Enter key
@@ -574,9 +612,9 @@
         errorMessage.textContent = error.message || 'An error occurred while scanning the card.';
         errorMessage.classList.add('show');
         
-        // Don't reset input on error - let user see what they typed
-        // Just refocus for next attempt
+        // Reset input after error
         setTimeout(() => {
+          rfidInput.value = '';
           rfidInput.focus();
           errorMessage.classList.remove('show');
         }, 3000);

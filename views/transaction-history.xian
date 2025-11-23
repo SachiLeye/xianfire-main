@@ -19,14 +19,22 @@
       font-family: "Segoe UI", sans-serif;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      background: #ffffffea;
-      border-radius: 16px;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
-      padding: 25px 20px;
-    }
+.container {
+  width: 100%;
+  max-width: 1400px;
+  height: 950px; /* fixed height */
+  background: #ffffffd9;
+  margin: 30px auto;
+  padding: 50px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  backdrop-filter: blur(8px);
+  overflow-y: auto;
+}
+
 
     .header {
       display: flex;
@@ -108,6 +116,24 @@
       background: #10b981;
       color: white;
     }
+
+.table-body-wrapper {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.transactions-table thead th {
+  position: sticky;
+  top: 0;
+  background: #10b981;
+  color: white;
+  z-index: 2;
+}
+
+.table-body-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
     .transactions-table {
       width: 100%;
@@ -227,29 +253,32 @@
       <button class="filter-btn" onclick="filterTransactions('in-progress')">In Progress</button>
     </div>
 
-    <div class="transactions-table">
-      <table id="transactionsTable">
-        <thead>
-          <tr>
-            <th>Date & Time</th>
-            <th>Socket Type</th>
-            <th>Points Used</th>
-            <th>Duration</th>
-            <th>Refunded</th>
-            <th>Remaining Points</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsBody">
-          <tr>
-            <td colspan="7" class="loading">
-              <i class="fas fa-spinner fa-spin"></i> Loading transactions...
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<div class="transactions-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Date & Time</th>
+        <th>Socket Type</th>
+        <th>Points Used</th>
+        <th>Duration</th>
+        <th>Refunded</th>
+        <th>Remaining Points</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+  </table>
+  <div class="table-body-wrapper">
+    <table>
+      <tbody id="transactionsBody">
+        <tr>
+          <td colspan="7" class="loading">
+            <i class="fas fa-spinner fa-spin"></i> Loading transactions...
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
+</div>
 
   <script>
     let allTransactions = [];

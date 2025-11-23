@@ -1,46 +1,5 @@
 // utils/gpioControl.js
-
-// Detect platform - use mock on Windows, real GPIO on Linux
-const isWindows = process.platform === 'win32';
-let Gpio;
-
-if (!isWindows) {
-  try {
-    // Only import onoff on Linux/Raspberry Pi
-    const onoffModule = await import('onoff');
-    Gpio = onoffModule.Gpio;
-  } catch (err) {
-    console.warn('⚠️ onoff package not available, using mock GPIO');
-  }
-}
-
-// Mock Gpio class for development on Windows
-class MockGpio {
-  constructor(pin, direction) {
-    this.pin = pin;
-    this.direction = direction;
-    this.value = 0;
-  }
-
-  writeSync(value) {
-    this.value = value;
-    console.log(`[MOCK GPIO] Pin ${this.pin} set to ${value}`);
-  }
-
-  readSync() {
-    return this.value;
-  }
-
-  unexport() {
-    console.log(`[MOCK GPIO] Pin ${this.pin} unexported`);
-  }
-}
-
-// Use MockGpio if Gpio is not available
-if (!Gpio) {
-  Gpio = MockGpio;
-  console.log('🔧 Using Mock GPIO for development (Windows detected)');
-}
+import { Gpio } from 'onoff';
 
 // Map socket numbers → GPIO pins (update with correct GPIO numbers!)
 const lineMap = {
