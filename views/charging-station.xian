@@ -388,7 +388,7 @@
       <div class="input-row">
         <div class="input-group">
           <label for="studentId">Student RFID</label>
-          <input type="text" id="studentId" placeholder="Enter RFID" value="" readonly />
+          <input type="text" id="studentId" placeholder="Enter RFID" value="" />
         </div>
 
         <div class="input-group">
@@ -465,7 +465,11 @@
 
         if (data.rfid) {
           currentStudentRFID = data.rfid;
-          document.getElementById("studentId").value = data.rfid;
+          // Only set the studentId if the field is empty to avoid clearing user input
+          const studentIdInput = document.getElementById("studentId");
+          if (!studentIdInput.value) {
+            studentIdInput.value = data.rfid;
+          }
           document.getElementById("displayStudentId").textContent = data.rfid;
           document.getElementById("displayName").textContent = data.name || 'N/A';
           document.getElementById("displayPoints").textContent = data.points || 0;

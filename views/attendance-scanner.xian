@@ -458,12 +458,13 @@
       }
 
       // Set new timeout - RFID readers typically input data quickly
+      // Increased to 1000ms to allow manual typing without auto-triggering
       scanTimeout = setTimeout(() => {
         const rfid = rfidInput.value.trim();
         if (rfid.length > 0) {
           scanRFID(rfid);
         }
-      }, 500); // Wait 500ms after last character
+      }, 1000); // Wait 1000ms after last character
     });
 
     // Also trigger on Enter key
@@ -573,9 +574,9 @@
         errorMessage.textContent = error.message || 'An error occurred while scanning the card.';
         errorMessage.classList.add('show');
         
-        // Reset input after error
+        // Don't reset input on error - let user see what they typed
+        // Just refocus for next attempt
         setTimeout(() => {
-          rfidInput.value = '';
           rfidInput.focus();
           errorMessage.classList.remove('show');
         }, 3000);
